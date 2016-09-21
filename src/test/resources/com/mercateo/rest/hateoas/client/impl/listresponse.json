@@ -1,0 +1,145 @@
+{
+  "members": [
+    {
+      "id": "1",
+      "total": 334.4,
+      "state": "OPEN",
+      "_schema": {
+        "links": [
+          {
+            "href": "http://localhost:9090/orders/1",
+            "targetSchema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "SHIPPED",
+                    "PROCESSING",
+                    "OPEN",
+                    "CANCELED",
+                    "RETURNED"
+                  ]
+                },
+                "total": {
+                  "type": "number"
+                }
+              }
+            },
+            "rel": "self",
+            "mediaType": "application/json",
+            "method": "GET"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2",
+      "total": 200,
+      "state": "SHIPPED",
+      "_schema": {
+        "links": [
+          {
+            "href": "http://localhost:9090/orders/2",
+            "targetSchema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "SHIPPED",
+                    "PROCESSING",
+                    "OPEN",
+                    "CANCELED",
+                    "RETURNED"
+                  ]
+                },
+                "total": {
+                  "type": "number"
+                }
+              }
+            },
+            "rel": "self",
+            "mediaType": "application/json",
+            "method": "GET"
+          },
+          {
+            "href": "http://localhost:9090/orders/2/send-back",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "message"
+              ]
+            },
+            "rel": "send-back",
+            "relType": "inherited",
+            "method": "POST",
+            "target": "_parent"
+          }
+        ]
+      }
+    }
+  ],
+  "total": 2,
+  "offset": 0,
+  "limit": 100,
+  "_schema": {
+    "links": [
+      {
+        "href": "http://localhost:9090/orders?offset=0&limit=100",
+        "targetSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer"
+            },
+            "members": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "SHIPPED",
+                      "PROCESSING",
+                      "OPEN",
+                      "CANCELED",
+                      "RETURNED"
+                    ]
+                  },
+                  "total": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "offset": {
+              "type": "integer"
+            },
+            "total": {
+              "type": "integer"
+            }
+          }
+        },
+        "rel": "self",
+        "mediaType": "application/json",
+        "method": "GET"
+      }
+    ]
+  }
+}

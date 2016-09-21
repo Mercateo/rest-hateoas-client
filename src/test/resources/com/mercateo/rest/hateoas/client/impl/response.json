@@ -1,0 +1,105 @@
+{
+  "firstName": "Test",
+  "lastName": "Tester",
+  "_schema": {
+    "links": [
+      {
+        "href": "http://localhost:9090/orders?offset=0&limit=20",
+        "targetSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer"
+            },
+            "members": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "SHIPPED",
+                      "PROCESSING",
+                      "OPEN",
+                      "CANCELED",
+                      "RETURNED"
+                    ]
+                  },
+                  "total": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "offset": {
+              "type": "integer"
+            },
+            "total": {
+              "type": "integer"
+            }
+          }
+        },
+        "rel": "orders",
+        "mediaType": "application/json",
+        "method": "GET"
+      },
+      {
+        "href": "http://localhost:9090/orders-linking?offset=0&limit=20",
+        "targetSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer"
+            },
+            "members": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "links": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {}
+                    }
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "SHIPPED",
+                      "PROCESSING",
+                      "OPEN",
+                      "CANCELED",
+                      "RETURNED"
+                    ]
+                  },
+                  "total": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "offset": {
+              "type": "integer"
+            },
+            "totalCount": {
+              "type": "integer"
+            }
+          }
+        },
+        "method": "GET",
+        "rel": "orders-linking",
+        "relType": "other",
+        "mediaType": "application/json",
+        "target": "_blank"
+      }
+    ]
+  }
+}

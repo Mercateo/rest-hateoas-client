@@ -1,0 +1,36 @@
+package com.mercateo.rest.hateoas.client.impl;
+
+import java.util.Optional;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.mercateo.common.rest.schemagen.JsonHyperSchema;
+import com.mercateo.rest.hateoas.client.OngoingResponse;
+import com.mercateo.rest.hateoas.client.Response;
+
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
+
+@AllArgsConstructor
+public class ResponseImpl<T> implements Response<T> {
+	@NonNull
+	private ResponseBuilder responseBuilder;
+
+	@VisibleForTesting
+	JsonHyperSchema jsonHyperSchema;
+
+	private T value;
+
+	@Override
+	public Optional<T> getResponseObject() {
+		return Optional.ofNullable(value);
+	}
+
+	@Override
+	public <S> OngoingResponse<S> prepareNextWithResponse(@NonNull Class<S> clazz) {
+		if (jsonHyperSchema == null) {
+			throw new IllegalStateException("There is no possibility for a next response");
+		}
+		return new OngoingResponseImpl<S>(clazz, jsonHyperSchema, responseBuilder);
+	}
+
+}
