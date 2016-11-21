@@ -1,13 +1,24 @@
 package com.mercateo.rest.hateoas.client.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
+
+import org.glassfish.jersey.uri.UriTemplate;
+import org.reflections.ReflectionUtils;
 
 import com.mercateo.common.rest.schemagen.JsonHyperSchema;
 import com.mercateo.common.rest.schemagen.link.LinkCreator;
@@ -64,11 +75,14 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 			return null;
 		}
 		Link link = linkOption.get();
-		WebTarget target = responseBuilder.getClient().target(link);
-		Builder b = target.request(MediaType.APPLICATION_JSON_TYPE);
-		String method = link.getParams().get(LinkCreator.METHOD_PARAM_KEY);
-		javax.ws.rs.core.Response response;
 
+		String method = link.getParams().get(LinkCreator.METHOD_PARAM_KEY);
+		URI uri = resolveTemplateParams(link, method);
+
+		WebTarget target = responseBuilder.getClient().target(uri);
+
+		Builder b = target.request(MediaType.APPLICATION_JSON_TYPE);
+		javax.ws.rs.core.Response response;
 		if (requestObject != null) {
 			response = b.method(method, Entity.json(requestObject));
 		} else {
@@ -80,4 +94,40 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 		String responseString = response.readEntity(String.class);
 		return responseString;
 	}
+
+	private URI resolveTemplateParams(Link link, String method) {
+		if (method.equalsIgnoreCase("get") && requestObject != null) {
+			String uriString = link.getUri().toASCIIString();
+			try {
+				uriString = URLDecoder.decode(uriString, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new ProcessingException(e);
+			}
+			UriTemplate uriTemplate = new UriTemplate(uriString);
+			UriBuilder uriBuilder = UriBuilder.fromUri(uriString);
+			List<String> vars = uriTemplate.getTemplateVariables();
+			if (vars.size() > 0) {
+				for (String var : vars) {
+					@SuppressWarnings("unchecked")
+					Set<Field> matchingFields = ReflectionUtils.getAllFields(requestObject.getClass(),
+							f -> f.getName().equals(var));
+					if (matchingFields.size() != 1) {
+						throw new IllegalStateException(
+								"There is more than one field for the template variable " + var);
+					}
+					Field matchingField = matchingFields.iterator().next();
+					matchingField.setAccessible(true);
+					try {
+						uriBuilder.resolveTemplate(var, matchingField.get(requestObject));
+					} catch (IllegalAccessException e) {
+						throw new ProcessingException(" Should never happen :-)");
+					}
+				}
+			}
+			return uriBuilder.build();
+		}
+		return link.getUri();
+
+	}
+
 }
