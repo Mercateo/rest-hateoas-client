@@ -82,7 +82,7 @@ public class ResponseBuilder0Test {
 		ListResponseImpl<OrderProjectionJson> r = (ListResponseImpl<OrderProjectionJson>) resp.get();
 		assertNotNull(r.jsonHyperSchema);
 		assertTrue(r.jsonHyperSchema.getByRel(() -> Relation.of("self")).isPresent());
-		ResponseImpl<OrderProjectionJson> orderResp = (ResponseImpl<OrderProjectionJson>) r.get(1);
+		ResponseImpl<OrderProjectionJson> orderResp = (ResponseImpl<OrderProjectionJson>) r.get(1).get();
 
 		assertEquals(200d, orderResp.getResponseObject().get().getTotalAmount(), 0);
 

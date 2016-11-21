@@ -12,10 +12,10 @@ public class Example {
 		Optional<ListResponse<OrderProjectionJson>> two = one.prepareNextWithResponse(OrderProjectionJson.class)
 				.callListWithRel("orders");
 
-		System.out.println(two.get().get(0).getResponseObject());
+		System.out.println(two.get().get(0).get().getResponseObject());
 		SendBackJson sendBackJson = new SendBackJson("test");
 
-		Optional<Response<Void>> three = two.get().get(1).prepareNextWithResponse(Void.class)
+		Optional<Response<Void>> three = two.get().get(1).get().prepareNextWithResponse(Void.class)
 				.withRequestObject(sendBackJson).callWithRel("send-back");
 
 		if (three.isPresent()) {

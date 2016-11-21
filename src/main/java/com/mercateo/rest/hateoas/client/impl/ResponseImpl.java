@@ -13,12 +13,12 @@ import lombok.NonNull;
 @AllArgsConstructor
 public class ResponseImpl<T> implements Response<T> {
 	@NonNull
-	private ResponseBuilder responseBuilder;
+	private final ResponseBuilder responseBuilder;
 
 	@VisibleForTesting
-	JsonHyperSchema jsonHyperSchema;
+	final JsonHyperSchema jsonHyperSchema;
 
-	private T value;
+	protected final T value;
 
 	@Override
 	public Optional<T> getResponseObject() {

@@ -35,13 +35,6 @@ public class ListResponseImpl0Test {
 	@InjectMocks
 	private ListResponseImpl<?> uut;
 
-	@Test
-	public void testGetResponseObject() throws Exception {
-		when(response.getResponseObject()).thenReturn(Optional.of(new Object()));
-		uut.getResponseObject();
-		verify(value).stream();
-		verify(response).getResponseObject();
-	}
 
 	@Test
 	public void testPrepareNextWithResponse() throws Exception {
