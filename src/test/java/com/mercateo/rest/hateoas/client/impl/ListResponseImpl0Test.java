@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,15 +34,15 @@ public class ListResponseImpl0Test {
 	@InjectMocks
 	private ListResponseImpl<?> uut;
 
-
 	@Test
 	public void testPrepareNextWithResponse() throws Exception {
 		uut.prepareNextWithResponse(Object.class);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unchecked")
+	@Test(expected = IndexOutOfBoundsException.class)
 	public void testGetIllegalIndex() throws Exception {
-		when(value.size()).thenReturn(0);
+		when(value.get(0)).thenThrow(IndexOutOfBoundsException.class);
 		uut.get(0);
 	}
 
