@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.message.internal.Statuses;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -69,6 +71,17 @@ public class OngoingResponseImpl0Test {
 		when(response.readEntity(String.class)).thenReturn("");
 		uut.callWithRel("test");
 		verify(responseBuilder).buildResponse(any(), any());
+	}
+
+	@Test(expected = WebApplicationException.class)
+	public void testCallWithRel_badRequest() throws Exception {
+		Link mockLink = mock(Link.class);
+		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "put"));
+		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
+		when(response.readEntity(String.class)).thenReturn("");
+		when(response.getStatus()).thenReturn(400);
+		when(response.getStatusInfo()).thenReturn(Statuses.from(400));
+		uut.callWithRel("test");
 	}
 
 	@Test

@@ -2,6 +2,7 @@ package com.mercateo.rest.hateoas.client.impl;
 
 import java.util.Optional;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
@@ -72,6 +73,9 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 			response = b.method(method, Entity.json(requestObject));
 		} else {
 			response = b.method(method);
+		}
+		if (response.getStatus() >= 300) {
+			throw new WebApplicationException(response);
 		}
 		String responseString = response.readEntity(String.class);
 		return responseString;
