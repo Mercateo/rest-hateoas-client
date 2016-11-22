@@ -8,7 +8,7 @@ import com.mercateo.rest.hateoas.client.Response;
 
 public class Example {
 	public static void main(String[] args) {
-		Response<Object> one = ClientStarter.create("http://localhost:9090", Object.class);
+		Response<Object> one = new ClientStarter().create("http://localhost:9090", Object.class);
 		Optional<ListResponse<OrderProjectionJson>> two = one.prepareNextWithResponse(OrderProjectionJson.class)
 				.callListWithRel("orders");
 
