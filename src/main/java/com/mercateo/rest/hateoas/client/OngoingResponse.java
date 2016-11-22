@@ -13,7 +13,7 @@ public interface OngoingResponse<T> {
 	 * @throws ProcessingException
 	 *             generic exception when something went wrong
 	 * @throws WebApplicationException
-	 *             if server response status was > 300
+	 *             if server response status was greater than 300
 	 * @throws IllegalStateException
 	 *             if the template does not match the configured RequestObject
 	 */
@@ -27,7 +27,7 @@ public interface OngoingResponse<T> {
 	 * @throws ProcessingException
 	 *             generic exception when something went wrong
 	 * @throws WebApplicationException
-	 *             if server response status was > 300
+	 *             if server response status was greater than 300
 	 * @throws IllegalStateException
 	 *             if the template does not match the configured RequestObject
 	 */
