@@ -6,5 +6,7 @@ public interface Response<T> {
 
 	Optional<T> getResponseObject();
 
+	boolean isRelPresent(String rel);
+
 	<S> OngoingResponse<S> prepareNextWithResponse(Class<S> clazz) throws IllegalStateException;
 }
