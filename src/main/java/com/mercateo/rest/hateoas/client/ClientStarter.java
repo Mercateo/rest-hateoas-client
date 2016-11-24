@@ -1,14 +1,15 @@
 package com.mercateo.rest.hateoas.client;
 
 import javax.inject.Inject;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.core.MediaType;
 
+import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.mercateo.rest.hateoas.client.impl.ResponseBuilder;
 
 import lombok.NonNull;
@@ -30,7 +31,15 @@ public class ClientStarter {
 	}
 
 	public <RootResponse> Response<RootResponse> create(@NonNull String url, @NonNull Class<RootResponse> clazz) {
-		Client newClient = jerseyClientBuilder.build();
+		return create(url, clazz, null);
+	}
+
+	public <RootResponse> Response<RootResponse> create(@NonNull String url, @NonNull Class<RootResponse> clazz,
+			ClientConfiguration clientConfigurationOrNull) {
+		JerseyClient newClient = jerseyClientBuilder.build();
+		if (clientConfigurationOrNull != null && !Strings.isNullOrEmpty(clientConfigurationOrNull.getAuthorization())) {
+			newClient.register(new AuthHeaderFilter(clientConfigurationOrNull.getAuthorization()));
+		}
 		ObjectMapper objectMapper = new ObjectMapper();
 		JaxbAnnotationModule module = new JaxbAnnotationModule();
 

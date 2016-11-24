@@ -2,6 +2,7 @@ package com.mercateo.rest.hateoas.client;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +49,25 @@ public class ClientStarter0Test {
 		verify(webTarget).request(any(MediaType.class));
 		verify(builder).get();
 		verify(resonse).readEntity(String.class);
+	}
+
+	@Test
+	public void testCreateWithConfig() throws Exception {
+		when(jerseyClientBuilder.build()).thenReturn(client);
+		when(client.target(anyString())).thenReturn(webTarget);
+		when(webTarget.request(any(MediaType.class))).thenReturn(builder);
+		when(builder.get()).thenReturn(resonse);
+		when(resonse.readEntity(String.class)).thenReturn("");
+
+		ClientConfiguration clientConfiguration = new ClientConfiguration("test");
+
+		Response<Object> response = uut.create("http://mercateo.com/test", Object.class, clientConfiguration);
+		verify(jerseyClientBuilder).build();
+		verify(client).target(anyString());
+		verify(webTarget).request(any(MediaType.class));
+		verify(builder).get();
+		verify(resonse).readEntity(String.class);
+		verify(client).register(eq(new AuthHeaderFilter("test")));
 	}
 
 }
