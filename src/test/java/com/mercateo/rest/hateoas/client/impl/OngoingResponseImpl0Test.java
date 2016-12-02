@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -144,6 +145,21 @@ public class OngoingResponseImpl0Test {
 		uut.callWithRel("test");
 		verify(builder).method(any(), any(Entity.class));
 		verify(responseBuilder).buildResponse(any(), any());
+	}
+	
+	@Test
+	public void testDoNotPassEntityForGet() throws Exception {
+		Link mockLink = mock(Link.class);
+		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "get"));
+		URI uri = new URI("http://www.mercateo.com/%7Bid%7D");
+		UriBuilder uriBuilder = UriBuilder.fromUri(uri);
+		when(mockLink.getUri()).thenReturn(uri);
+		when(mockLink.getUriBuilder()).thenReturn(uriBuilder);
+		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
+		when(response.readEntity(String.class)).thenReturn("");
+		uut = uut.withRequestObject(new StringIdBean("bla"));
+		uut.callWithRel("test");
+		verify(builder, never()).method(any(), any(Entity.class));
 	}
 
 	@Test
