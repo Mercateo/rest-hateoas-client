@@ -3,6 +3,6 @@
 
 A very simple HATEOAS client for java. Note, that it is in an alpha state and subject of changes. 
 
-There is an example package in the client test folder. To make it run one needs to run the example server which can be found [here](https://github.com/Mercateo/rest-demo-feature).
+There is an  [example](rest-hateoas-client/src/test/java/com/mercateo/rest/hateoas/client/example/Example.java) in the client test folder. To make it run one needs to run the example server which can be found [here](https://github.com/Mercateo/rest-demo-feature).
 
     
