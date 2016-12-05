@@ -1,5 +1,6 @@
 package com.mercateo.rest.hateoas.client.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -24,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.message.internal.Statuses;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -110,8 +112,8 @@ public class OngoingResponseImpl0Test {
 		verify(client).target(eq(new URI("http://www.mercateo.com/id1")));
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void testCallWithRelAndTemplate_wrongParameterObject() throws Exception {
+	@Test
+	public void testCallWithRelAndTemplate_to_many_parameter_for_template() throws Exception {
 		Link mockLink = mock(Link.class);
 		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "get"));
 		URI uri = new URI("http://www.mercateo.com/%7Bid%7D");
@@ -121,7 +123,33 @@ public class OngoingResponseImpl0Test {
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenReturn("");
 		uut = uut.withRequestObject(new StringIdBean2());
-		uut.callWithRel("test");
+		try {
+			uut.callWithRel("test");
+			Assert.fail("No IllegalStateException thrown");
+		} catch (IllegalStateException e) {
+			assertEquals(
+					"There is more than one field for the template variable id: [java.lang.String com.mercateo.rest.hateoas.client.impl.OngoingResponseImpl0Test$StringIdBean.id, java.lang.String com.mercateo.rest.hateoas.client.impl.OngoingResponseImpl0Test$StringIdBean2.id]",
+					e.getMessage());
+		}
+	}
+
+	@Test
+	public void testCallWithRelAndTemplate_missing_parameter_for_template() throws Exception {
+		Link mockLink = mock(Link.class);
+		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "get"));
+		URI uri = new URI("http://www.mercateo.com/%7Bid%7D");
+		UriBuilder uriBuilder = UriBuilder.fromUri(uri);
+		when(mockLink.getUri()).thenReturn(uri);
+		when(mockLink.getUriBuilder()).thenReturn(uriBuilder);
+		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
+		when(response.readEntity(String.class)).thenReturn("");
+		uut = uut.withRequestObject(new Object());
+		try {
+			uut.callWithRel("test");
+			Assert.fail("No IllegalStateException thrown");
+		} catch (IllegalStateException e) {
+			assertEquals("No field found for the template variable id", e.getMessage());
+		}
 	}
 
 	@Test(expected = WebApplicationException.class)
@@ -146,7 +174,7 @@ public class OngoingResponseImpl0Test {
 		verify(builder).method(any(), any(Entity.class));
 		verify(responseBuilder).buildResponse(any(), any());
 	}
-	
+
 	@Test
 	public void testDoNotPassEntityForGet() throws Exception {
 		Link mockLink = mock(Link.class);
