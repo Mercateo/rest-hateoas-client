@@ -17,6 +17,7 @@ import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
+import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.uri.UriTemplate;
 import org.reflections.ReflectionUtils;
 
@@ -83,7 +84,7 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 
 		Builder b = target.request(MediaType.APPLICATION_JSON_TYPE);
 		javax.ws.rs.core.Response response;
-		if (requestObject != null) {
+		if (requestObject != null && bodyIsAllowed(method)) {
 			response = b.method(method, Entity.json(requestObject));
 		} else {
 			response = b.method(method);
@@ -93,6 +94,16 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 		}
 		String responseString = response.readEntity(String.class);
 		return responseString;
+	}
+
+	/**
+	 * @see JerseyInvocation#initializeMap()
+	 * 
+	 * @param method
+	 * @return true if a request body is allowed for the given method
+	 */
+	private static boolean bodyIsAllowed(String method) {
+		return method.equalsIgnoreCase("put") || method.equalsIgnoreCase("post");
 	}
 
 	private URI resolveTemplateParams(Link link, String method) {
@@ -111,9 +122,12 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 					@SuppressWarnings("unchecked")
 					Set<Field> matchingFields = ReflectionUtils.getAllFields(requestObject.getClass(),
 							f -> f.getName().equals(var));
-					if (matchingFields.size() != 1) {
+					if(matchingFields.isEmpty()) {
 						throw new IllegalStateException(
-								"There is more than one field for the template variable " + var);
+								"No field found for the template variable " + var);
+					} else if (matchingFields.size() != 1) {
+						throw new IllegalStateException(
+								"There is more than one field for the template variable " + var + ": " + matchingFields);
 					}
 					Field matchingField = matchingFields.iterator().next();
 					matchingField.setAccessible(true);
