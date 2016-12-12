@@ -12,9 +12,9 @@ import javax.ws.rs.client.Client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mercateo.common.rest.schemagen.JsonHyperSchema;
 import com.mercateo.rest.hateoas.client.ListResponse;
 import com.mercateo.rest.hateoas.client.Response;
+import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,7 +39,7 @@ public class ResponseBuilder {
 	public <S> Optional<ListResponse<S>> buildListResponse(@NonNull String responseString,
 			@NonNull Class<S> responseClass) {
 		JsonNode rawValue = getRawValue(responseString);
-		JsonHyperSchema jsonHyperSchema = buildSchema(rawValue);
+		ClientHyperSchema jsonHyperSchema = buildSchema(rawValue);
 		JsonNode membersNode = rawValue.get("members");
 		if (membersNode != null) {
 			List<Response<S>> list = new LinkedList<>();
@@ -53,10 +53,10 @@ public class ResponseBuilder {
 		}
 	}
 
-	private JsonHyperSchema buildSchema(JsonNode rawValue) {
+	private ClientHyperSchema buildSchema(JsonNode rawValue) {
 		JsonNode schemaElement = rawValue.get("_schema");
 		try {
-			return objectMapper.treeToValue(schemaElement, JsonHyperSchema.class);
+			return objectMapper.treeToValue(schemaElement, ClientHyperSchema.class);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -77,7 +77,7 @@ public class ResponseBuilder {
 		try {
 
 			S value = objectMapper.treeToValue(rawValue, responseClass);
-			JsonHyperSchema schema = buildSchema(rawValue);
+			ClientHyperSchema schema = buildSchema(rawValue);
 			Response<S> returningResponse = new ResponseImpl<>(this, schema, value);
 			return Optional.of(returningResponse);
 		} catch (IOException e) {

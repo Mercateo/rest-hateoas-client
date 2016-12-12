@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.mercateo.common.rest.schemagen.link.relation.Relation;
 import com.mercateo.rest.hateoas.client.ListResponse;
 import com.mercateo.rest.hateoas.client.Response;
 import com.mercateo.rest.hateoas.client.example.OrderProjectionJson;
@@ -60,8 +59,8 @@ public class ResponseBuilder0Test {
 		assertTrue(resp.get().getResponseObject().isPresent());
 		ResponseImpl<Object> r = (ResponseImpl<Object>) resp.get();
 		assertNotNull(r.jsonHyperSchema);
-		assertTrue(r.jsonHyperSchema.getByRel(() -> Relation.of("orders")).isPresent());
-		assertTrue(r.jsonHyperSchema.getByRel(() -> Relation.of("orders-linking")).isPresent());
+		assertTrue(r.jsonHyperSchema.getByRel("orders").isPresent());
+		assertTrue(r.jsonHyperSchema.getByRel("orders-linking").isPresent());
 	}
 
 	@Test(expected = ProcessingException.class)
@@ -81,12 +80,12 @@ public class ResponseBuilder0Test {
 		assertTrue(resp.get().getResponseObject().isPresent());
 		ListResponseImpl<OrderProjectionJson> r = (ListResponseImpl<OrderProjectionJson>) resp.get();
 		assertNotNull(r.jsonHyperSchema);
-		assertTrue(r.jsonHyperSchema.getByRel(() -> Relation.of("self")).isPresent());
+		assertTrue(r.jsonHyperSchema.getByRel("self").isPresent());
 		ResponseImpl<OrderProjectionJson> orderResp = (ResponseImpl<OrderProjectionJson>) r.get(1).get();
 
 		assertEquals(200d, orderResp.getResponseObject().get().getTotalAmount(), 0);
 
-		assertTrue(orderResp.jsonHyperSchema.getByRel(() -> Relation.of("send-back")).isPresent());
+		assertTrue(orderResp.jsonHyperSchema.getByRel("send-back").isPresent());
 	}
 
 	@Test(expected = ProcessingException.class)

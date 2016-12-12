@@ -1,7 +1,6 @@
 package com.mercateo.rest.hateoas.client.example;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -16,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @NoArgsConstructor
 @RequiredArgsConstructor
 public class SendBackJson {
-	@NotNull
+
 	@Nonnull
 	private String message;
 

@@ -3,10 +3,9 @@ package com.mercateo.rest.hateoas.client.impl;
 import java.util.Optional;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.mercateo.common.rest.schemagen.JsonHyperSchema;
-import com.mercateo.common.rest.schemagen.link.relation.Relation;
 import com.mercateo.rest.hateoas.client.OngoingResponse;
 import com.mercateo.rest.hateoas.client.Response;
+import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -17,7 +16,7 @@ public class ResponseImpl<T> implements Response<T> {
 	private final ResponseBuilder responseBuilder;
 
 	@VisibleForTesting
-	final JsonHyperSchema jsonHyperSchema;
+	final ClientHyperSchema jsonHyperSchema;
 
 	protected final T value;
 
@@ -36,7 +35,7 @@ public class ResponseImpl<T> implements Response<T> {
 
 	@Override
 	public boolean isRelPresent(@NonNull String rel) {
-		return jsonHyperSchema != null && jsonHyperSchema.getByRel(() -> Relation.of(rel)).isPresent();
+		return jsonHyperSchema != null && jsonHyperSchema.getByRel(rel).isPresent();
 	}
 
 }

@@ -13,14 +13,15 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.common.collect.Lists;
-import com.mercateo.common.rest.schemagen.JsonHyperSchema;
 import com.mercateo.rest.hateoas.client.Response;
+import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
+
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ListResponseImpl0Test {
 	@Mock
-	private JsonHyperSchema rawValue;
+	private ClientHyperSchema rawValue;
 
 	@Mock
 	private ResponseBuilder responseBuilder;

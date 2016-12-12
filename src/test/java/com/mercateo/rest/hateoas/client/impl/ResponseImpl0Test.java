@@ -8,19 +8,18 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import javax.ws.rs.core.Link;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.mercateo.common.rest.schemagen.JsonHyperSchema;
+import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
+import com.mercateo.rest.hateoas.client.schema.SchemaLink;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResponseImpl0Test {
 	@Mock
-	private JsonHyperSchema jsonHyperSchema;
+	private ClientHyperSchema jsonHyperSchema;
 
 	@Mock
 	private ResponseBuilder responseBuilder;
@@ -33,7 +32,7 @@ public class ResponseImpl0Test {
 
 	@Test
 	public void testIsRelPresent() throws Exception {
-		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mock(Link.class)));
+		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mock(SchemaLink.class)));
 		ResponseImpl<Object> uut = new ResponseImpl<Object>(responseBuilder, jsonHyperSchema, new Object());
 		assertTrue(uut.isRelPresent("test"));
 	}

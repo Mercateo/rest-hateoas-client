@@ -1,10 +1,11 @@
 package com.mercateo.rest.hateoas.client.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.net.URLDecoder;
+import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -13,20 +14,18 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.uri.UriTemplate;
 import org.reflections.ReflectionUtils;
 
-import com.mercateo.common.rest.schemagen.JsonHyperSchema;
-import com.mercateo.common.rest.schemagen.link.LinkCreator;
-import com.mercateo.common.rest.schemagen.link.relation.Relation;
+import com.google.common.annotations.VisibleForTesting;
 import com.mercateo.rest.hateoas.client.ListResponse;
 import com.mercateo.rest.hateoas.client.OngoingResponse;
 import com.mercateo.rest.hateoas.client.Response;
+import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
+import com.mercateo.rest.hateoas.client.schema.SchemaLink;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -37,6 +36,9 @@ import lombok.experimental.Wither;
 @RequiredArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class OngoingResponseImpl<S> implements OngoingResponse<S> {
+	@VisibleForTesting
+	static final String METHOD_PARAM_KEY = "method";
+
 	@Wither
 	private Object requestObject;
 
@@ -44,7 +46,7 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 	private Class<S> responseClass;
 
 	@NonNull
-	private JsonHyperSchema jsonHyperSchema;
+	private ClientHyperSchema jsonHyperSchema;
 
 	@NonNull
 	private ResponseBuilder responseBuilder;
@@ -71,13 +73,13 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 	}
 
 	private String getResponse(String rel) {
-		Optional<Link> linkOption = jsonHyperSchema.getByRel(() -> Relation.of(rel));
+		Optional<SchemaLink> linkOption = jsonHyperSchema.getByRel(rel);
 		if (!linkOption.isPresent()) {
 			return null;
 		}
-		Link link = linkOption.get();
+		SchemaLink link = linkOption.get();
 
-		String method = link.getParams().get(LinkCreator.METHOD_PARAM_KEY);
+		String method = link.getMap().get(METHOD_PARAM_KEY);
 		URI uri = resolveTemplateParams(link, method);
 
 		WebTarget target = responseBuilder.getClient().target(uri);
@@ -106,41 +108,38 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 		return method.equalsIgnoreCase("put") || method.equalsIgnoreCase("post");
 	}
 
-	private URI resolveTemplateParams(Link link, String method) {
+	private URI resolveTemplateParams(SchemaLink link, String method) {
+		Map<String, String> params = new HashMap<>();
+		UriTemplate uriTemplate = link.getHref();
 		if (method.equalsIgnoreCase("get") && requestObject != null) {
-			String uriString = link.getUri().toASCIIString();
-			try {
-				uriString = URLDecoder.decode(uriString, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				throw new ProcessingException(e);
-			}
-			UriTemplate uriTemplate = new UriTemplate(uriString);
-			UriBuilder uriBuilder = UriBuilder.fromUri(uriString);
 			List<String> vars = uriTemplate.getTemplateVariables();
 			if (vars.size() > 0) {
+
 				for (String var : vars) {
 					@SuppressWarnings("unchecked")
 					Set<Field> matchingFields = ReflectionUtils.getAllFields(requestObject.getClass(),
 							f -> f.getName().equals(var));
-					if(matchingFields.isEmpty()) {
-						throw new IllegalStateException(
-								"No field found for the template variable " + var);
+					if (matchingFields.isEmpty()) {
+						throw new IllegalStateException("No field found for the template variable " + var);
 					} else if (matchingFields.size() != 1) {
-						throw new IllegalStateException(
-								"There is more than one field for the template variable " + var + ": " + matchingFields);
+						throw new IllegalStateException("There is more than one field for the template variable " + var
+								+ ": " + matchingFields);
 					}
 					Field matchingField = matchingFields.iterator().next();
 					matchingField.setAccessible(true);
 					try {
-						uriBuilder.resolveTemplate(var, matchingField.get(requestObject));
+						params.put(var, matchingField.get(requestObject).toString());
 					} catch (IllegalAccessException e) {
 						throw new ProcessingException(" Should never happen :-)");
 					}
 				}
 			}
-			return uriBuilder.build();
 		}
-		return link.getUri();
+		try {
+			return new URI(uriTemplate.createURI(params));
+		} catch (URISyntaxException e) {
+			throw new ProcessingException(e);
+		}
 
 	}
 

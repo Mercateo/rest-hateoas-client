@@ -19,12 +19,11 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.message.internal.Statuses;
+import org.glassfish.jersey.uri.UriTemplate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,8 +31,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Maps;
-import com.mercateo.common.rest.schemagen.JsonHyperSchema;
-import com.mercateo.common.rest.schemagen.link.LinkCreator;
+import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
+import com.mercateo.rest.hateoas.client.schema.SchemaLink;
 
 import jersey.repackaged.com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
@@ -56,7 +55,7 @@ public class OngoingResponseImpl0Test {
 	}
 
 	@Mock
-	private JsonHyperSchema jsonHyperSchema;
+	private ClientHyperSchema jsonHyperSchema;
 
 	@Mock
 	private ResponseBuilder responseBuilder;
@@ -88,8 +87,11 @@ public class OngoingResponseImpl0Test {
 
 	@Test
 	public void testCallWithRel() throws Exception {
-		Link mockLink = mock(Link.class);
-		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "put"));
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "put"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/");
+		when(mockLink.getHref()).thenReturn(uri);
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenReturn("");
 		uut.callWithRel("test");
@@ -98,12 +100,11 @@ public class OngoingResponseImpl0Test {
 
 	@Test
 	public void testCallWithRelAndTemplate() throws Exception {
-		Link mockLink = mock(Link.class);
-		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "get"));
-		URI uri = new URI("http://www.mercateo.com/%7Bid%7D");
-		UriBuilder uriBuilder = UriBuilder.fromUri(uri);
-		when(mockLink.getUri()).thenReturn(uri);
-		when(mockLink.getUriBuilder()).thenReturn(uriBuilder);
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "get"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/{id}");
+		when(mockLink.getHref()).thenReturn(uri);
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenReturn("");
 		uut = uut.withRequestObject(new StringIdBean("id1"));
@@ -114,12 +115,11 @@ public class OngoingResponseImpl0Test {
 
 	@Test
 	public void testCallWithRelAndTemplate_to_many_parameter_for_template() throws Exception {
-		Link mockLink = mock(Link.class);
-		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "get"));
-		URI uri = new URI("http://www.mercateo.com/%7Bid%7D");
-		UriBuilder uriBuilder = UriBuilder.fromUri(uri);
-		when(mockLink.getUri()).thenReturn(uri);
-		when(mockLink.getUriBuilder()).thenReturn(uriBuilder);
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "get"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/{id}");
+		when(mockLink.getHref()).thenReturn(uri);
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenReturn("");
 		uut = uut.withRequestObject(new StringIdBean2());
@@ -134,13 +134,30 @@ public class OngoingResponseImpl0Test {
 	}
 
 	@Test
+	public void testCallWithRelAndTemplate_missing_parameter_for_template_depr() throws Exception {
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "get"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/{id}");
+		when(mockLink.getHref()).thenReturn(uri);
+		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
+		when(response.readEntity(String.class)).thenReturn("");
+		uut = uut.withRequestObject(new Object());
+		try {
+			uut.callWithRel("test");
+			Assert.fail("No IllegalStateException thrown");
+		} catch (IllegalStateException e) {
+			assertEquals("No field found for the template variable id", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testCallWithRelAndTemplate_missing_parameter_for_template() throws Exception {
-		Link mockLink = mock(Link.class);
-		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "get"));
-		URI uri = new URI("http://www.mercateo.com/%7Bid%7D");
-		UriBuilder uriBuilder = UriBuilder.fromUri(uri);
-		when(mockLink.getUri()).thenReturn(uri);
-		when(mockLink.getUriBuilder()).thenReturn(uriBuilder);
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "get"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/{id}");
+		when(mockLink.getHref()).thenReturn(uri);
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenReturn("");
 		uut = uut.withRequestObject(new Object());
@@ -154,8 +171,11 @@ public class OngoingResponseImpl0Test {
 
 	@Test(expected = WebApplicationException.class)
 	public void testCallWithRel_badRequest() throws Exception {
-		Link mockLink = mock(Link.class);
-		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "put"));
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "put"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/");
+		when(mockLink.getHref()).thenReturn(uri);
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenReturn("");
 		when(response.getStatus()).thenReturn(400);
@@ -165,8 +185,11 @@ public class OngoingResponseImpl0Test {
 
 	@Test
 	public void testCallWithRel_Object() throws Exception {
-		Link mockLink = mock(Link.class);
-		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "put"));
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "put"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/");
+		when(mockLink.getHref()).thenReturn(uri);
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenReturn("");
 		uut = uut.withRequestObject(new Object());
@@ -177,12 +200,11 @@ public class OngoingResponseImpl0Test {
 
 	@Test
 	public void testDoNotPassEntityForGet() throws Exception {
-		Link mockLink = mock(Link.class);
-		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "get"));
-		URI uri = new URI("http://www.mercateo.com/%7Bid%7D");
-		UriBuilder uriBuilder = UriBuilder.fromUri(uri);
-		when(mockLink.getUri()).thenReturn(uri);
-		when(mockLink.getUriBuilder()).thenReturn(uriBuilder);
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "get"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/%7Bid%7D");
+		when(mockLink.getHref()).thenReturn(uri);
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenReturn("");
 		uut = uut.withRequestObject(new StringIdBean("bla"));
@@ -192,8 +214,11 @@ public class OngoingResponseImpl0Test {
 
 	@Test
 	public void testCallListWithRel() throws Exception {
-		Link mockLink = mock(Link.class);
-		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "put"));
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "put"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/");
+		when(mockLink.getHref()).thenReturn(uri);
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenReturn("");
 		uut.callListWithRel("test");
@@ -221,18 +246,25 @@ public class OngoingResponseImpl0Test {
 	@SuppressWarnings("unchecked")
 	@Test(expected = ProcessingException.class)
 	public void testCallWithRel_SchemaParseException() throws Exception {
-		Link mockLink = mock(Link.class);
-		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "put"));
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "put"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/");
+		when(mockLink.getHref()).thenReturn(uri);
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenThrow(ProcessingException.class);
+
 		uut.callWithRel("test");
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test(expected = ProcessingException.class)
 	public void testCallListWithRel_SchemaParseException() throws Exception {
-		Link mockLink = mock(Link.class);
-		when(mockLink.getParams()).thenReturn(Maps.asMap(Sets.newHashSet(LinkCreator.METHOD_PARAM_KEY), k -> "put"));
+		SchemaLink mockLink = mock(SchemaLink.class);
+		when(mockLink.getMap())
+				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "put"));
+		UriTemplate uri = new UriTemplate("http://www.mercateo.com/");
+		when(mockLink.getHref()).thenReturn(uri);
 		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
 		when(response.readEntity(String.class)).thenThrow(ProcessingException.class);
 		uut.callListWithRel("test");

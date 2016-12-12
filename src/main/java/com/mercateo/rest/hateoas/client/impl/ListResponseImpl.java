@@ -5,13 +5,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.util.List;
 import java.util.Optional;
 
-import com.mercateo.common.rest.schemagen.JsonHyperSchema;
 import com.mercateo.rest.hateoas.client.ListResponse;
 import com.mercateo.rest.hateoas.client.Response;
+import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
 
 public class ListResponseImpl<T> extends ResponseImpl<List<Response<T>>>implements ListResponse<T> {
 
-	public ListResponseImpl(ResponseBuilder responseBuilder, JsonHyperSchema jsonHyperSchema, List<Response<T>> value) {
+	public ListResponseImpl(ResponseBuilder responseBuilder, ClientHyperSchema jsonHyperSchema,
+			List<Response<T>> value) {
 		super(responseBuilder, jsonHyperSchema, value);
 	}
 
