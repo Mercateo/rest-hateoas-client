@@ -87,12 +87,11 @@ public class OngoingResponseImpl0Test {
 
 	@Test
 	public void testCallWithRel() throws Exception {
-		SchemaLink mockLink = mock(SchemaLink.class);
-		when(mockLink.getMap())
-				.thenReturn(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "put"));
-		UriTemplate uri = new UriTemplate("http://www.mercateo.com/");
-		when(mockLink.getHref()).thenReturn(uri);
-		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
+		SchemaLink link = new SchemaLink();
+		link.setMap(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "put"));
+		String uri = "http://www.mercateo.com/";
+		link.setHref(uri);
+		when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(link));
 		when(response.readEntity(String.class)).thenReturn("");
 		uut.callWithRel("test");
 		verify(responseBuilder).buildResponse(any(), any());
