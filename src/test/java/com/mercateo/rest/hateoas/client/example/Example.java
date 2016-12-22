@@ -33,21 +33,5 @@ public class Example {
 			System.out.println("no send-back available in list available");
 		}
 
-		// demonstrating templated links
-		Optional<Response<OrderProjectionJson>> secondElementDirectCall = collectionResource.get()
-				.prepareNextWithResponse(OrderProjectionJson.class).withRequestObject(new IdBean("2"))
-				.callWithRel("instance");
-
-		System.out.println(secondElementDirectCall.get().getResponseObject());
-
-		Optional<Response<Void>> sentBack2 = secondElementDirectCall.get().prepareNextWithResponse(Void.class)
-				.withRequestObject(sendBackJson).callWithRel("send-back");
-
-		if (sentBack2.isPresent()) {
-			System.out.println("sent back in template");
-		} else {
-			System.out.println("no send-back available in template");
-		}
-
 	}
 }
