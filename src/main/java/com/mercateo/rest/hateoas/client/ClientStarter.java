@@ -6,6 +6,7 @@ import javax.ws.rs.core.MediaType;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.google.common.annotations.VisibleForTesting;
@@ -41,6 +42,7 @@ public class ClientStarter {
 			newClient.register(new AuthHeaderFilter(clientConfigurationOrNull.getAuthorization()));
 		}
 		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		JaxbAnnotationModule module = new JaxbAnnotationModule();
 
 		objectMapper.registerModule(module);

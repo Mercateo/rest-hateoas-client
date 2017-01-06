@@ -82,7 +82,7 @@ public class ResponseBuilder {
 			return Optional.of(returningResponse);
 		} catch (IOException e) {
 			throw new ProcessingException("The response class " + responseClass.getName()
-					+ " does not fit the response. Response was :" + rawValue);
+					+ " does not fit the response. Response was :" + rawValue, e);
 		}
 	}
 }
