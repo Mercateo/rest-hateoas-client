@@ -5,6 +5,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.glassfish.jersey.media.sse.SseFeature;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,39 +18,40 @@ import lombok.NonNull;
 
 public class ClientStarter {
 
-	private final JerseyClientBuilder jerseyClientBuilder;
+    private final JerseyClientBuilder jerseyClientBuilder;
 
-	public ClientStarter() {
-		super();
-		jerseyClientBuilder = new JerseyClientBuilder();
-	}
+    public ClientStarter() {
+        super();
+        jerseyClientBuilder = new JerseyClientBuilder();
+    }
 
-	@VisibleForTesting
-	@Inject
-	ClientStarter(@NonNull JerseyClientBuilder jerseyClientBuilder) {
-		super();
-		this.jerseyClientBuilder = jerseyClientBuilder;
-	}
+    @VisibleForTesting
+    @Inject
+    ClientStarter(@NonNull JerseyClientBuilder jerseyClientBuilder) {
+        super();
+        this.jerseyClientBuilder = jerseyClientBuilder;
+    }
 
-	public <RootResponse> Response<RootResponse> create(@NonNull String url, @NonNull Class<RootResponse> clazz) {
-		return create(url, clazz, null);
-	}
+    public <RootResponse> Response<RootResponse> create(@NonNull String url,
+            @NonNull Class<RootResponse> clazz) {
+        return create(url, clazz, null);
+    }
 
-	public <RootResponse> Response<RootResponse> create(@NonNull String url, @NonNull Class<RootResponse> clazz,
-			ClientConfiguration clientConfigurationOrNull) {
-		JerseyClient newClient = jerseyClientBuilder.build();
-		if (clientConfigurationOrNull != null && !Strings.isNullOrEmpty(clientConfigurationOrNull.getAuthorization())) {
-			newClient.register(new AuthHeaderFilter(clientConfigurationOrNull.getAuthorization()));
-		}
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		JaxbAnnotationModule module = new JaxbAnnotationModule();
+    public <RootResponse> Response<RootResponse> create(@NonNull String url,
+            @NonNull Class<RootResponse> clazz, ClientConfiguration clientConfigurationOrNull) {
+        JerseyClient newClient = jerseyClientBuilder.register(SseFeature.class).build();
+        if (clientConfigurationOrNull != null && !Strings.isNullOrEmpty(clientConfigurationOrNull
+                .getAuthorization())) {
+            newClient.register(new AuthHeaderFilter(clientConfigurationOrNull.getAuthorization()));
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JaxbAnnotationModule module = new JaxbAnnotationModule();
 
-		objectMapper.registerModule(module);
-		ResponseBuilder responseBuilder = new ResponseBuilder(newClient, objectMapper);
-		return responseBuilder.buildResponse(
-				newClient.target(url).request(MediaType.APPLICATION_JSON_TYPE).get().readEntity(String.class), clazz)
-				.get();
-	}
+        objectMapper.registerModule(module);
+        ResponseBuilder responseBuilder = new ResponseBuilder(newClient, objectMapper);
+        return responseBuilder.buildResponse(newClient.target(url).request(
+                MediaType.APPLICATION_JSON_TYPE).get().readEntity(String.class), clazz).get();
+    }
 
 }
