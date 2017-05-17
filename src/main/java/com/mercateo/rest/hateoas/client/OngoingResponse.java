@@ -36,6 +36,7 @@ public interface OngoingResponse<T> {
 
     OngoingResponse<T> withRequestObject(Object object);
 
-    Optional<AutoCloseable> subscribe(SSEObserver<T> observer, String mainEventName, String rel);
+    Optional<AutoCloseable> subscribe(String rel, SSEObserver<T> observer, String mainEventName,
+            long reconnectionTime);
 
 }

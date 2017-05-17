@@ -1,4 +1,4 @@
-package com.mercateo.rest.hateoas.client.impl;
+package com.mercateo.rest.hateoas.client.impl.sse;
 
 import java.util.Optional;
 
@@ -7,6 +7,7 @@ import org.glassfish.jersey.media.sse.InboundEvent;
 
 import com.mercateo.rest.hateoas.client.Response;
 import com.mercateo.rest.hateoas.client.SSEObserver;
+import com.mercateo.rest.hateoas.client.impl.ResponseBuilder;
 
 import lombok.NonNull;
 
@@ -39,6 +40,10 @@ public class SSEListener<T> implements EventListener {
             sseObserver.onSignal(eventName);
         }
 
+    }
+
+    public void onError(String errorName) {
+        sseObserver.onError(errorName);
     }
 
 }

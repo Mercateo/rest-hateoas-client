@@ -1,5 +1,7 @@
 package com.mercateo.rest.hateoas.client.impl;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.ProcessingException;
@@ -29,6 +32,8 @@ import com.mercateo.rest.hateoas.client.ListResponse;
 import com.mercateo.rest.hateoas.client.OngoingResponse;
 import com.mercateo.rest.hateoas.client.Response;
 import com.mercateo.rest.hateoas.client.SSEObserver;
+import com.mercateo.rest.hateoas.client.impl.sse.EventSourceWithCloseGuard;
+import com.mercateo.rest.hateoas.client.impl.sse.SSEListener;
 import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
 import com.mercateo.rest.hateoas.client.schema.SchemaLink;
 
@@ -169,19 +174,22 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
     }
 
     @Override
-    public Optional<AutoCloseable> subscribe(@NonNull SSEObserver<S> observer,
-            @NonNull String mainEventName, @NonNull String rel) {
+    public Optional<AutoCloseable> subscribe(@NonNull String rel, @NonNull SSEObserver<S> observer,
+            @NonNull String mainEventName, long reconnectionTime) {
+        checkArgument(reconnectionTime > 0);
         Pair pair = resolve(rel);
         if (pair == null) {
             return Optional.empty();
         }
         EventSource eventSource = EventSource.target(pair.target).named("SSE" + UUID.randomUUID())
-                .build();
+                .reconnectingEvery(reconnectionTime, TimeUnit.MILLISECONDS).build();
         SSEListener<S> sseListener = new SSEListener<>(responseClass, responseBuilder, observer,
                 mainEventName);
         eventSource.register(sseListener);
-        eventSource.open();
-        return Optional.of(eventSource::close);
+        EventSourceWithCloseGuard ev = new EventSourceWithCloseGuard(eventSource, reconnectionTime,
+                sseListener);
+        ev.open();
+        return Optional.of(ev);
     }
 
     @SneakyThrows
