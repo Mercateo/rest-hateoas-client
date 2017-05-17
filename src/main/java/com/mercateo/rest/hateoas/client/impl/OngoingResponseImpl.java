@@ -88,6 +88,9 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 
     private String getResponse(String rel) {
         Pair pair = resolve(rel);
+        if (pair == null) {
+            return null;
+        }
         Builder b = pair.target.request(MediaType.APPLICATION_JSON_TYPE);
         javax.ws.rs.core.Response response;
         if (requestObject != null && bodyIsAllowed(pair.method)) {
@@ -169,6 +172,9 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
     public Optional<AutoCloseable> subscribe(@NonNull SSEObserver<S> observer,
             @NonNull String mainEventName, @NonNull String rel) {
         Pair pair = resolve(rel);
+        if (pair == null) {
+            return Optional.empty();
+        }
         EventSource eventSource = EventSource.target(pair.target).named("SSE" + UUID.randomUUID())
                 .build();
         SSEListener<S> sseListener = new SSEListener<>(responseClass, responseBuilder, observer,
