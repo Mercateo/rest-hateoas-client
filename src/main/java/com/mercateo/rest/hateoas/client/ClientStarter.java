@@ -15,6 +15,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.mercateo.rest.hateoas.client.impl.ResponseBuilder;
+import com.mercateo.rest.hateoas.client.impl.ResponseImpl;
 
 import lombok.NonNull;
 
@@ -57,6 +58,10 @@ public class ClientStarter {
         ResponseBuilder responseBuilder = new ResponseBuilder(newClient, objectMapper);
         return responseBuilder.buildResponse(newClient.target(url).request(
                 MediaType.APPLICATION_JSON_TYPE).get().readEntity(String.class), clazz).get();
+    }
+
+    public void destroy(Response<?> response) {
+        ((ResponseImpl<?>) response).getResponseBuilder().getClient().close();
     }
 
 }
