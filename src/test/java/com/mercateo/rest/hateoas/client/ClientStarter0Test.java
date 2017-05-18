@@ -43,6 +43,7 @@ public class ClientStarter0Test {
     public void testCreate() throws Exception {
         when(jerseyClientBuilder.build()).thenReturn(client);
         when(jerseyClientBuilder.register(SseFeature.class)).thenReturn(jerseyClientBuilder);
+        when(jerseyClientBuilder.withConfig(any())).thenReturn(jerseyClientBuilder);
         when(client.target(anyString())).thenReturn(webTarget);
         when(webTarget.request(any(MediaType.class))).thenReturn(builder);
         when(builder.get()).thenReturn(resonse);
@@ -60,6 +61,7 @@ public class ClientStarter0Test {
     public void testCreateWithConfig() throws Exception {
         when(jerseyClientBuilder.build()).thenReturn(client);
         when(jerseyClientBuilder.register(SseFeature.class)).thenReturn(jerseyClientBuilder);
+        when(jerseyClientBuilder.withConfig(any())).thenReturn(jerseyClientBuilder);
         when(client.target(anyString())).thenReturn(webTarget);
         when(webTarget.request(any(MediaType.class))).thenReturn(builder);
         when(builder.get()).thenReturn(resonse);

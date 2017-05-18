@@ -182,7 +182,8 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
             return Optional.empty();
         }
         EventSource eventSource = EventSource.target(pair.target).named("SSE" + UUID.randomUUID())
-                .reconnectingEvery(reconnectionTime, TimeUnit.MILLISECONDS).build();
+                .usePersistentConnections().reconnectingEvery(reconnectionTime,
+                        TimeUnit.MILLISECONDS).build();
         SSEListener<S> sseListener = new SSEListener<>(responseClass, responseBuilder, observer,
                 mainEventName);
         eventSource.register(sseListener);

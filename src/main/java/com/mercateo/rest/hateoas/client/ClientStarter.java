@@ -3,8 +3,10 @@ package com.mercateo.rest.hateoas.client;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 
+import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.glassfish.jersey.grizzly.connector.GrizzlyConnectorProvider;
 import org.glassfish.jersey.media.sse.SseFeature;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -39,7 +41,10 @@ public class ClientStarter {
 
     public <RootResponse> Response<RootResponse> create(@NonNull String url,
             @NonNull Class<RootResponse> clazz, ClientConfiguration clientConfigurationOrNull) {
-        JerseyClient newClient = jerseyClientBuilder.register(SseFeature.class).build();
+        ClientConfig config = new ClientConfig();
+        config.connectorProvider(new GrizzlyConnectorProvider());
+        JerseyClient newClient = jerseyClientBuilder.register(SseFeature.class).withConfig(config)
+                .build();
         if (clientConfigurationOrNull != null && !Strings.isNullOrEmpty(clientConfigurationOrNull
                 .getAuthorization())) {
             newClient.register(new AuthHeaderFilter(clientConfigurationOrNull.getAuthorization()));

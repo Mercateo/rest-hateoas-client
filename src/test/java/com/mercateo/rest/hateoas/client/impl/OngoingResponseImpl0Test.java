@@ -99,6 +99,21 @@ public class OngoingResponseImpl0Test {
     }
 
     @Test
+    public void testCallWithRelAndGetParams() throws Exception {
+        SchemaLink link = new SchemaLink();
+        link.setMap(Maps.asMap(Sets.newHashSet(OngoingResponseImpl.METHOD_PARAM_KEY), k -> "get"));
+        String uri = "http://www.mercateo.com/";
+        link.setHref(uri);
+        when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(link));
+        when(response.readEntity(String.class)).thenReturn("");
+        StringIdBean sb = new StringIdBean();
+        sb.setId("1");
+        uut.withRequestObject(sb).callWithRel("test");
+        verify(responseBuilder).buildResponse(any(), any());
+        verify(webTarget).queryParam("id", "1");
+    }
+
+    @Test
     public void testCallWithRelAndTemplate() throws Exception {
         SchemaLink mockLink = mock(SchemaLink.class);
         when(mockLink.getMap()).thenReturn(Maps.asMap(Sets.newHashSet(

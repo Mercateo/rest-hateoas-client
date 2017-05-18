@@ -11,8 +11,6 @@ import lombok.Value;
 
 public class Example {
 
-    static boolean errorOccured = false;
-
     @Value
     public static class IdBean {
         String id;
@@ -22,9 +20,10 @@ public class Example {
         Response<Object> rootResource = new ClientStarter().create("http://localhost:8080",
                 Object.class);
         OngoingResponse<IdBean> sseResponse = rootResource.prepareNextWithResponse(IdBean.class)
-                .withRequestObject(new FactRequest(true, "%7B%20%22ns%22%3A%22a%22%7D"));
+                .withRequestObject(new FactRequest(true, "%7B%20%22ns%22%3A%22ab%22%7D"));
 
         Optional<AutoCloseable> es = sseResponse.subscribe("facts", new SSEObserver<IdBean>() {
+            private int count = 0;
 
             @Override
             public void onSignal(String signal) {
@@ -34,21 +33,18 @@ public class Example {
 
             @Override
             public void onEvent(Response<IdBean> response) {
-                System.out.println(response.prepareNextWithResponse(FactJson.class).callWithRel(
-                        "canonical").get().getResponseObject().get());
+                count++;
+                Optional<Response<FactJson>> fact = response.prepareNextWithResponse(FactJson.class)
+                        .callWithRel("canonical");
+                System.out.println(count + fact.get().getResponseObject().get().toString());
 
             }
 
             @Override
             public void onError(String errorCode) {
-                errorOccured = true;
                 System.out.println("error occured" + errorCode);
 
             }
         }, "new-fact", 1000);
-
-        while (!errorOccured) {
-            Thread.sleep(1000);
-        }
     }
 }
