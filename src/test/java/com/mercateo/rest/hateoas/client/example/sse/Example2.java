@@ -24,7 +24,7 @@ public class Example2 {
         OngoingResponse<FactJson> sseResponse = rootResource.prepareNextWithResponse(FactJson.class)
                 .withRequestObject(new FactRequest(true, "%7B%20%22ns%22%3A%22ab%22%7D"));
         Stopwatch stopwatch = Stopwatch.createStarted();
-        Optional<AutoCloseable> es = sseResponse.subscribe("full-facts",
+        Optional<AutoCloseable> es = sseResponse.subscribe("http://rels.factcast.org/full-facts",
                 new SSEObserver<FactJson>() {
                     private int count = 0;
 

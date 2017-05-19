@@ -22,30 +22,31 @@ public class Example {
         OngoingResponse<IdBean> sseResponse = rootResource.prepareNextWithResponse(IdBean.class)
                 .withRequestObject(new FactRequest(true, "%7B%20%22ns%22%3A%22ab%22%7D"));
 
-        Optional<AutoCloseable> es = sseResponse.subscribe("facts", new SSEObserver<IdBean>() {
-            private int count = 0;
+        Optional<AutoCloseable> es = sseResponse.subscribe("http://rels.factcast.org/fact-ids",
+                new SSEObserver<IdBean>() {
+                    private int count = 0;
 
-            @Override
-            public void onSignal(String signal) {
-                System.out.println(signal);
+                    @Override
+                    public void onSignal(String signal) {
+                        System.out.println(signal);
 
-            }
+                    }
 
-            @Override
-            public void onEvent(Response<IdBean> response) {
-                count++;
-                Optional<Response<FactJson>> fact = response.prepareNextWithResponse(FactJson.class)
-                        .callWithRel("canonical");
-                System.out.println(count + fact.get().getResponseObject().get().toString());
+                    @Override
+                    public void onEvent(Response<IdBean> response) {
+                        count++;
+                        Optional<Response<FactJson>> fact = response.prepareNextWithResponse(
+                                FactJson.class).callWithRel("canonical");
+                        System.out.println(count + fact.get().getResponseObject().get().toString());
 
-            }
+                    }
 
-            @Override
-            public void onError(String errorCode) {
-                System.out.println("error occured" + errorCode);
+                    @Override
+                    public void onError(String errorCode) {
+                        System.out.println("error occured" + errorCode);
 
-            }
-        }, "new-fact", 1000);
+                    }
+                }, "new-fact", 1000);
         Thread.sleep(10000000);
     }
 }
