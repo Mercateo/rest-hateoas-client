@@ -46,5 +46,6 @@ public class Example {
 
             }
         }, "new-fact", 1000);
+        Thread.sleep(10000000);
     }
 }

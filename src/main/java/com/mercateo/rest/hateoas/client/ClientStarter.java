@@ -3,10 +3,10 @@ package com.mercateo.rest.hateoas.client;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.glassfish.jersey.grizzly.connector.GrizzlyConnectorProvider;
 import org.glassfish.jersey.media.sse.SseFeature;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -15,7 +15,6 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.mercateo.rest.hateoas.client.impl.ResponseBuilder;
-import com.mercateo.rest.hateoas.client.impl.ResponseImpl;
 
 import lombok.NonNull;
 
@@ -43,7 +42,7 @@ public class ClientStarter {
     public <RootResponse> Response<RootResponse> create(@NonNull String url,
             @NonNull Class<RootResponse> clazz, ClientConfiguration clientConfigurationOrNull) {
         ClientConfig config = new ClientConfig();
-        config.connectorProvider(new GrizzlyConnectorProvider());
+        config.connectorProvider(new ApacheConnectorProvider());
         JerseyClient newClient = jerseyClientBuilder.register(SseFeature.class).withConfig(config)
                 .build();
         if (clientConfigurationOrNull != null && !Strings.isNullOrEmpty(clientConfigurationOrNull
@@ -58,10 +57,6 @@ public class ClientStarter {
         ResponseBuilder responseBuilder = new ResponseBuilder(newClient, objectMapper);
         return responseBuilder.buildResponse(newClient.target(url).request(
                 MediaType.APPLICATION_JSON_TYPE).get().readEntity(String.class), clazz).get();
-    }
-
-    public void destroy(Response<?> response) {
-        ((ResponseImpl<?>) response).getResponseBuilder().getClient().close();
     }
 
 }

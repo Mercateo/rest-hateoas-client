@@ -32,7 +32,6 @@ public class Example2 {
                     public void onSignal(String signal) {
                         System.out.println(signal + " after " + stopwatch.elapsed(TimeUnit.SECONDS)
                                 + " and " + count + " objects received");
-
                     }
 
                     @Override
@@ -46,8 +45,8 @@ public class Example2 {
                     @Override
                     public void onError(String errorCode) {
                         System.out.println("error occured" + errorCode);
-
                     }
                 }, "new-fact", 1000);
+        Thread.sleep(1000000);
     }
 }

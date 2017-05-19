@@ -8,13 +8,11 @@ import com.mercateo.rest.hateoas.client.Response;
 import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NonNull;
 
 @AllArgsConstructor
 public class ResponseImpl<T> implements Response<T> {
     @NonNull
-    @Getter
     private final ResponseBuilder responseBuilder;
 
     @VisibleForTesting
