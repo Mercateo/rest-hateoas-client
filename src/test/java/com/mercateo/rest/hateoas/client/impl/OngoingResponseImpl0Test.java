@@ -3,6 +3,7 @@ package com.mercateo.rest.hateoas.client.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -11,6 +12,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import javax.ws.rs.ProcessingException;
@@ -49,6 +52,15 @@ public class OngoingResponseImpl0Test {
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class StringIdCollectionBean {
+        String id;
+
+        List<String> list;
+    }
+
+    @Data
     @EqualsAndHashCode(callSuper = true)
     public class StringIdBean2 extends StringIdBean {
         String id;
@@ -80,7 +92,8 @@ public class OngoingResponseImpl0Test {
         uut = new OngoingResponseImpl<>(Object.class, jsonHyperSchema, responseBuilder);
         when(responseBuilder.getClient()).thenReturn(client);
         when(client.target(any(URI.class))).thenReturn(webTarget);
-        when(webTarget.queryParam(any(), any())).thenReturn(webTarget);
+        when(webTarget.queryParam(any(), anyVararg())).thenReturn(webTarget);
+
         when(webTarget.request(MediaType.APPLICATION_JSON_TYPE)).thenReturn(builder);
         when(builder.method(any())).thenReturn(response);
         when(builder.method(any(), any(Entity.class))).thenReturn(response);
@@ -106,11 +119,13 @@ public class OngoingResponseImpl0Test {
         link.setHref(uri);
         when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(link));
         when(response.readEntity(String.class)).thenReturn("");
-        StringIdBean sb = new StringIdBean();
+        StringIdCollectionBean sb = new StringIdCollectionBean();
         sb.setId("1");
+        sb.setList(Arrays.asList("1", "2"));
         uut.withRequestObject(sb).callWithRel("test");
         verify(responseBuilder).buildResponse(any(), any());
         verify(webTarget).queryParam("id", "1");
+        verify(webTarget).queryParam("list", "1", "2");
     }
 
     @Test
