@@ -5,7 +5,7 @@
 
 	<groupId>com.mercateo.rest</groupId>
 	<artifactId>rest-hateoas-client</artifactId>
-	<version>0.0.6-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<packaging>jar</packaging>
 	<name>rest-hateoas-client</name>
 	<description>Client for dynamic discovery of REST-APIs which are developed with the help of common.rest.schemagen</description>
