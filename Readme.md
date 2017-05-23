@@ -3,6 +3,10 @@
 
 A very simple HATEOAS client for java.
 
-There is an  [example](src/test/java/com/mercateo/rest/hateoas/client/example/Example.java) in the client test folder. To make it run one needs to run the example server which can be found [here](https://github.com/Mercateo/rest-demo-feature).
+There are some examples in the client test folder. 
 
-    
+1. Simple [example](src/test/java/com/mercateo/rest/hateoas/client/example/Example.java) To make it run one needs to run the example server which can be found [here](https://github.com/Mercateo/rest-demo-feature).
+
+2. SSE [example](src/test/java/com/mercateo/rest/hateoas/client/example/sse/Example.java). To make it run one has to run the server of the [factcast](https://github.com/uweschaefer/factcast) project.
+
+3. further SSE [example](src/test/java/com/mercateo/rest/hateoas/client/example/sse/Example2.java). To make it run one has to run the server of the [factcast](https://github.com/uweschaefer/factcast) project. 
