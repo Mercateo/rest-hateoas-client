@@ -5,7 +5,7 @@ import lombok.Value;
 @Value
 public class FactRequest {
 
-    private boolean follow;
+    private boolean continuous;
 
     private String factSpec;
 }
