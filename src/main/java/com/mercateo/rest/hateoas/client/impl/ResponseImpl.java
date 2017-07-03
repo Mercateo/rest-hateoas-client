@@ -35,10 +35,7 @@ public class ResponseImpl<T> implements Response<T> {
         if (jsonHyperSchema == null) {
             throw new IllegalStateException("There is no possibility for a next response");
         }
-        OngoingResponseImpl<S> ongoingResponseImpl = new OngoingResponseImpl<S>(clazz,
-                jsonHyperSchema, responseBuilder, previousUri);
-
-        return ongoingResponseImpl;
+        return new OngoingResponseImpl<S>(clazz, jsonHyperSchema, responseBuilder, previousUri);
     }
 
     @Override

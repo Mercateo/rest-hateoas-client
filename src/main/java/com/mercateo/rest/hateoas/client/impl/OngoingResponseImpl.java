@@ -123,10 +123,7 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
         String method = link.getMap().get(METHOD_PARAM_KEY);
         URI uri = resolveTemplateParams(link, method);
 
-        // uri -> /content/articles/801e3cb6-160a-4f55-91be-6c85896cc8c5
-        URI resolved = previousUri.resolve(uri);
-
-        WebTarget target = responseBuilder.getClient().target(resolved);
+        WebTarget target = responseBuilder.getClient().target(previousUri.resolve(uri));
 
         target = resolveQueryParams(target, link, method);
         return new Pair(target, method);
