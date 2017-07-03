@@ -86,10 +86,12 @@ public class OngoingResponseImpl0Test {
 
     private OngoingResponseImpl<?> uut;
 
+    private URI uri = URI.create("http://localhost:8080/");
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        uut = new OngoingResponseImpl<>(Object.class, jsonHyperSchema, responseBuilder);
+        uut = new OngoingResponseImpl<>(Object.class, jsonHyperSchema, responseBuilder, uri);
         when(responseBuilder.getClient()).thenReturn(client);
         when(client.target(any(URI.class))).thenReturn(webTarget);
         when(webTarget.queryParam(any(), anyVararg())).thenReturn(webTarget);

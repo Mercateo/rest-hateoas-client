@@ -4,11 +4,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -20,7 +21,8 @@ import jersey.repackaged.com.google.common.collect.Lists;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ListResponseImpl0Test {
-	@Mock
+
+    @Mock
 	private ClientHyperSchema rawValue;
 
 	@Mock
@@ -32,8 +34,14 @@ public class ListResponseImpl0Test {
 	@Spy
 	private List<Response<?>> value = Lists.newArrayList(response);
 
-	@InjectMocks
+	private URI uri = URI.create("http://localhost:8080/");
+
 	private ListResponseImpl<?> uut;
+
+	@Before
+	public void setup() {
+	    this.uut = new ListResponseImpl(responseBuilder, rawValue, value, uri);
+	}
 
 	@Test
 	public void testPrepareNextWithResponse() throws Exception {

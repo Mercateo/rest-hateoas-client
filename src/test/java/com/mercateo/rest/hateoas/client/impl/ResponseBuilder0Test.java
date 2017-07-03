@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.util.Optional;
 
 import javax.ws.rs.ProcessingException;
@@ -14,7 +15,6 @@ import javax.ws.rs.client.Client;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -35,13 +35,15 @@ public class ResponseBuilder0Test {
 	@Spy
 	private ObjectMapper objectMapper = new ObjectMapper();
 
-	@InjectMocks
 	private ResponseBuilder uut;
+
+    private URI uri = URI.create("http://localhost:8080/");
 
 	@Before
 	public void setup() {
 		JaxbAnnotationModule module = new JaxbAnnotationModule();
 		objectMapper.registerModule(module);
+		uut = new ResponseBuilder(client, objectMapper, uri);
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package com.mercateo.rest.hateoas.client.impl;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,10 +28,11 @@ public class ResponseBuilder {
 	private Client client;
 	@NonNull
 	private ObjectMapper objectMapper;
+	URI uri = URI.create("http://localhost:8080/");
 
 	public <S> Optional<Response<S>> buildResponse(@NonNull String responseString, @NonNull Class<S> responseClass) {
 		if (responseString.length() == 0) {
-			return Optional.of(new ResponseImpl<>(this, null, null));
+			return Optional.of(new ResponseImpl<>(this, null, null, uri));
 		}
 		JsonNode rawValue = getRawValue(responseString);
 		return buildSingleResponse(rawValue, responseClass);
@@ -47,7 +49,7 @@ public class ResponseBuilder {
 				JsonNode jsonNode = iterator.next();
 				list.add(buildSingleResponse(jsonNode, responseClass).get());
 			}
-			return Optional.of(new ListResponseImpl<>(this, jsonHyperSchema, list));
+			return Optional.of(new ListResponseImpl<>(this, jsonHyperSchema, list, uri));
 		} else {
 			throw new ProcessingException("There is no members field in the response");
 		}
@@ -78,7 +80,7 @@ public class ResponseBuilder {
 
 			S value = objectMapper.treeToValue(rawValue, responseClass);
 			ClientHyperSchema schema = buildSchema(rawValue);
-			Response<S> returningResponse = new ResponseImpl<>(this, schema, value);
+			Response<S> returningResponse = new ResponseImpl<>(this, schema, value, uri);
 			return Optional.of(returningResponse);
 		} catch (IOException e) {
 			throw new ProcessingException("The response class " + responseClass.getName()
