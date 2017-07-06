@@ -1,5 +1,6 @@
 package com.mercateo.rest.hateoas.client.impl.sse;
 
+import java.net.URI;
 import java.util.Optional;
 
 import org.glassfish.jersey.media.sse.EventListener;
@@ -21,12 +22,15 @@ public class SSEListener<T> implements EventListener {
 
     private String mainEventName;
 
+    private URI uri;
+
     public SSEListener(@NonNull Class<T> clazz, @NonNull ResponseBuilder responseBuilder,
-            @NonNull SSEObserver<T> sseObserver, @NonNull String mainEventName) {
+            @NonNull SSEObserver<T> sseObserver, @NonNull String mainEventName, URI uri) {
         this.mainEventName = mainEventName;
         this.clazz = clazz;
         this.responseBuilder = responseBuilder;
         this.sseObserver = sseObserver;
+        this.uri = uri;
     }
 
     @Override
@@ -34,7 +38,7 @@ public class SSEListener<T> implements EventListener {
         String eventName = inboundEvent.getName();
         if (mainEventName.equals(eventName)) {
             Optional<Response<T>> resp = responseBuilder.buildResponse(inboundEvent.readData(),
-                    clazz);
+                    clazz, uri);
             sseObserver.onEvent(resp.get());
         } else {
             sseObserver.onSignal(eventName);

@@ -58,12 +58,11 @@ public class ClientStarter {
         JaxbAnnotationModule module = new JaxbAnnotationModule();
 
         objectMapper.registerModule(module);
-        ResponseBuilder responseBuilder = new ResponseBuilder(newClient, objectMapper, URI.create(
-                url));
+        ResponseBuilder responseBuilder = new ResponseBuilder(newClient, objectMapper);
         JerseyWebTarget webTarget = newClient.target(url);
         Builder requestBuilder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
         String readEntity = requestBuilder.get().readEntity(String.class);
-        return responseBuilder.buildResponse(readEntity, clazz).get();
+        return responseBuilder.buildResponse(readEntity, clazz, URI.create(url)).get();
     }
 
 }

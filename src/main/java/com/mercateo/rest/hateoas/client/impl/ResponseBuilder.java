@@ -23,23 +23,24 @@ import lombok.NonNull;
 
 @AllArgsConstructor
 public class ResponseBuilder {
-	@NonNull
+
+    @NonNull
 	@Getter
 	private Client client;
+	
 	@NonNull
 	private ObjectMapper objectMapper;
-	URI uri = URI.create("http://localhost:8080/");
 
-	public <S> Optional<Response<S>> buildResponse(@NonNull String responseString, @NonNull Class<S> responseClass) {
+	public <S> Optional<Response<S>> buildResponse(@NonNull String responseString, @NonNull Class<S> responseClass, @NonNull URI uri) {
 		if (responseString.length() == 0) {
 			return Optional.of(new ResponseImpl<>(this, null, null, uri));
 		}
 		JsonNode rawValue = getRawValue(responseString);
-		return buildSingleResponse(rawValue, responseClass);
+		return buildSingleResponse(rawValue, responseClass, uri);
 	}
 
 	public <S> Optional<ListResponse<S>> buildListResponse(@NonNull String responseString,
-			@NonNull Class<S> responseClass) {
+			@NonNull Class<S> responseClass, @NonNull URI uri) {
 		JsonNode rawValue = getRawValue(responseString);
 		ClientHyperSchema jsonHyperSchema = buildSchema(rawValue);
 		JsonNode membersNode = rawValue.get("members");
@@ -47,7 +48,7 @@ public class ResponseBuilder {
 			List<Response<S>> list = new LinkedList<>();
 			for (Iterator<JsonNode> iterator = membersNode.elements(); iterator.hasNext();) {
 				JsonNode jsonNode = iterator.next();
-				list.add(buildSingleResponse(jsonNode, responseClass).get());
+				list.add(buildSingleResponse(jsonNode, responseClass, uri).get());
 			}
 			return Optional.of(new ListResponseImpl<>(this, jsonHyperSchema, list, uri));
 		} else {
@@ -75,7 +76,7 @@ public class ResponseBuilder {
 		return rawValue;
 	}
 
-	private <S> Optional<Response<S>> buildSingleResponse(JsonNode rawValue, Class<S> responseClass) {
+	private <S> Optional<Response<S>> buildSingleResponse(JsonNode rawValue, Class<S> responseClass, URI uri) {
 		try {
 
 			S value = objectMapper.treeToValue(rawValue, responseClass);

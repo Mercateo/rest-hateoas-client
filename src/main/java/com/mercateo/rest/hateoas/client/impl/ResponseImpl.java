@@ -23,7 +23,7 @@ public class ResponseImpl<T> implements Response<T> {
     protected final T value;
 
     @NonNull
-    private URI previousUri;
+    private URI uri;
 
     @Override
     public Optional<T> getResponseObject() {
@@ -35,7 +35,7 @@ public class ResponseImpl<T> implements Response<T> {
         if (jsonHyperSchema == null) {
             throw new IllegalStateException("There is no possibility for a next response");
         }
-        return new OngoingResponseImpl<S>(clazz, jsonHyperSchema, responseBuilder, previousUri);
+        return new OngoingResponseImpl<S>(clazz, jsonHyperSchema, responseBuilder, uri);
     }
 
     @Override

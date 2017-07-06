@@ -110,7 +110,7 @@ public class OngoingResponseImpl0Test {
         when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(link));
         when(response.readEntity(String.class)).thenReturn("");
         uut.callWithRel("test");
-        verify(responseBuilder).buildResponse(any(), any());
+        verify(responseBuilder).buildResponse(any(), any(), any());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class OngoingResponseImpl0Test {
         sb.setId("1");
         sb.setList(Arrays.asList("1", "2"));
         uut.withRequestObject(sb).callWithRel("test");
-        verify(responseBuilder).buildResponse(any(), any());
+        verify(responseBuilder).buildResponse(any(), any(), any());
         verify(webTarget).queryParam("id", "1");
         verify(webTarget).queryParam("list", "1", "2");
     }
@@ -141,7 +141,7 @@ public class OngoingResponseImpl0Test {
         when(response.readEntity(String.class)).thenReturn("");
         uut = uut.withRequestObject(new StringIdBean("id1"));
         uut.callWithRel("test");
-        verify(responseBuilder).buildResponse(any(), any());
+        verify(responseBuilder).buildResponse(any(), any(), any());
         verify(client).target(eq(new URI("http://www.mercateo.com/id1")));
     }
 
@@ -227,7 +227,7 @@ public class OngoingResponseImpl0Test {
         uut = uut.withRequestObject(new Object());
         uut.callWithRel("test");
         verify(builder).method(any(), any(Entity.class));
-        verify(responseBuilder).buildResponse(any(), any());
+        verify(responseBuilder).buildResponse(any(), any(), any());
     }
 
     @Test
@@ -254,7 +254,7 @@ public class OngoingResponseImpl0Test {
         when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
         when(response.readEntity(String.class)).thenReturn("");
         uut.callListWithRel("test");
-        verify(responseBuilder).buildListResponse(any(), any());
+        verify(responseBuilder).buildListResponse(any(), any(), any());
     }
 
     @Test

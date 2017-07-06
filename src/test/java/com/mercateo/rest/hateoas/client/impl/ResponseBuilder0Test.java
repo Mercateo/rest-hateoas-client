@@ -43,12 +43,12 @@ public class ResponseBuilder0Test {
 	public void setup() {
 		JaxbAnnotationModule module = new JaxbAnnotationModule();
 		objectMapper.registerModule(module);
-		uut = new ResponseBuilder(client, objectMapper, uri);
+		uut = new ResponseBuilder(client, objectMapper);
 	}
 
 	@Test
 	public void testBuildEmptyResponse() throws Exception {
-		Optional<Response<Object>> resp = uut.buildResponse("", Object.class);
+		Optional<Response<Object>> resp = uut.buildResponse("", Object.class,uri);
 		assertFalse(resp.get().getResponseObject().isPresent());
 	}
 
@@ -57,7 +57,7 @@ public class ResponseBuilder0Test {
 		String responseRaw = CharStreams
 				.toString(new InputStreamReader(this.getClass().getResourceAsStream("response.json"), Charsets.UTF_8));
 
-		Optional<Response<Object>> resp = uut.buildResponse(responseRaw, Object.class);
+		Optional<Response<Object>> resp = uut.buildResponse(responseRaw, Object.class,uri);
 		assertTrue(resp.get().getResponseObject().isPresent());
 		ResponseImpl<Object> r = (ResponseImpl<Object>) resp.get();
 		assertNotNull(r.jsonHyperSchema);
@@ -69,7 +69,7 @@ public class ResponseBuilder0Test {
 	public void testBuildResponseSchemaNotMatch() throws Exception {
 		String responseRaw = CharStreams
 				.toString(new InputStreamReader(this.getClass().getResourceAsStream("response.json"), Charsets.UTF_8));
-		uut.buildResponse(responseRaw, String.class);
+		uut.buildResponse(responseRaw, String.class,uri);
 	}
 
 	@Test
@@ -78,7 +78,7 @@ public class ResponseBuilder0Test {
 				new InputStreamReader(this.getClass().getResourceAsStream("listresponse.json"), Charsets.UTF_8));
 
 		Optional<ListResponse<OrderProjectionJson>> resp = uut.buildListResponse(responseRaw,
-				OrderProjectionJson.class);
+				OrderProjectionJson.class,uri);
 		assertTrue(resp.get().getResponseObject().isPresent());
 		ListResponseImpl<OrderProjectionJson> r = (ListResponseImpl<OrderProjectionJson>) resp.get();
 		assertNotNull(r.jsonHyperSchema);
@@ -95,7 +95,7 @@ public class ResponseBuilder0Test {
 		String responseRaw = CharStreams
 				.toString(new InputStreamReader(this.getClass().getResourceAsStream("response.json"), Charsets.UTF_8));
 
-		uut.buildListResponse(responseRaw, OrderProjectionJson.class);
+		uut.buildListResponse(responseRaw, OrderProjectionJson.class,uri);
 	}
 
 }
