@@ -274,7 +274,7 @@ public class OngoingResponseImpl0Test {
         when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(link));
         when(response.readEntity(String.class)).thenReturn("");
         uut.callWithRel("test");
-        verify(responseBuilder).buildResponse(any(), any());
+        verify(responseBuilder).buildResponse(any(), any(), any());
     }
 
     @Test
