@@ -121,8 +121,11 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
         SchemaLink link = linkOption.get();
 
         String method = link.getMap().get(METHOD_PARAM_KEY);
+        if (method == null) {
+            method = "GET";
+        }
+        
         URI resolvedUri = resolveTemplateParams(link, method);
-
         WebTarget target = responseBuilder.getClient().target(uri.resolve(resolvedUri));
 
         target = resolveQueryParams(target, link, method);

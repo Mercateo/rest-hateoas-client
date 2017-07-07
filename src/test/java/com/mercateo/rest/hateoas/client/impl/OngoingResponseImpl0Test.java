@@ -267,6 +267,17 @@ public class OngoingResponseImpl0Test {
     }
 
     @Test
+    public void testCallWithRelDefaultMethodGET() throws Exception {
+        SchemaLink link = new SchemaLink();
+        String uri = "http://www.mercateo.com/";
+        link.setHref(uri);
+        when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(link));
+        when(response.readEntity(String.class)).thenReturn("");
+        uut.callWithRel("test");
+        verify(responseBuilder).buildResponse(any(), any());
+    }
+
+    @Test
     public void testCallListWithRelNotExist() throws Exception {
         when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.empty());
         when(response.readEntity(String.class)).thenReturn("");
