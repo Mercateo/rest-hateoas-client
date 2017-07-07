@@ -70,6 +70,9 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
     @NonNull
     private ResponseBuilder responseBuilder;
 
+    @NonNull
+    private URI uri;
+
     @Override
     public Optional<Response<S>> callWithRel(@NonNull String rel) {
 
@@ -78,7 +81,7 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
             return Optional.empty();
         }
 
-        return responseBuilder.buildResponse(responseString, responseClass);
+        return responseBuilder.buildResponse(responseString, responseClass,uri);
 
     }
 
@@ -88,7 +91,7 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
         if (responseString == null) {
             return Optional.empty();
         }
-        return responseBuilder.buildListResponse(responseString, responseClass);
+        return responseBuilder.buildListResponse(responseString, responseClass, uri);
     }
 
     private String getResponse(String rel) {
@@ -121,9 +124,9 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
         if (method == null) {
             method = "GET";
         }
-        URI uri = resolveTemplateParams(link, method);
-
-        WebTarget target = responseBuilder.getClient().target(uri);
+        
+        URI resolvedUri = resolveTemplateParams(link, method);
+        WebTarget target = responseBuilder.getClient().target(uri.resolve(resolvedUri));
 
         target = resolveQueryParams(target, link, method);
         return new Pair(target, method);
@@ -188,7 +191,7 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
                 .usePersistentConnections().reconnectingEvery(reconnectionTime,
                         TimeUnit.MILLISECONDS).build();
         SSEListener<S> sseListener = new SSEListener<>(responseClass, responseBuilder, observer,
-                mainEventName);
+                mainEventName, uri);
         eventSource.register(sseListener);
         EventSourceWithCloseGuard ev = new EventSourceWithCloseGuard(eventSource, reconnectionTime,
                 sseListener);

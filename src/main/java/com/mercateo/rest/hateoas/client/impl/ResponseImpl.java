@@ -1,5 +1,6 @@
 package com.mercateo.rest.hateoas.client.impl;
 
+import java.net.URI;
 import java.util.Optional;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -12,6 +13,7 @@ import lombok.NonNull;
 
 @AllArgsConstructor
 public class ResponseImpl<T> implements Response<T> {
+
     @NonNull
     private final ResponseBuilder responseBuilder;
 
@@ -19,6 +21,9 @@ public class ResponseImpl<T> implements Response<T> {
     final ClientHyperSchema jsonHyperSchema;
 
     protected final T value;
+
+    @NonNull
+    private URI uri;
 
     @Override
     public Optional<T> getResponseObject() {
@@ -30,7 +35,7 @@ public class ResponseImpl<T> implements Response<T> {
         if (jsonHyperSchema == null) {
             throw new IllegalStateException("There is no possibility for a next response");
         }
-        return new OngoingResponseImpl<S>(clazz, jsonHyperSchema, responseBuilder);
+        return new OngoingResponseImpl<S>(clazz, jsonHyperSchema, responseBuilder, uri);
     }
 
     @Override

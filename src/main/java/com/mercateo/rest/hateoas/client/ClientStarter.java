@@ -1,5 +1,7 @@
 package com.mercateo.rest.hateoas.client;
 
+import java.net.URI;
+
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 
@@ -7,6 +9,8 @@ import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.glassfish.jersey.client.JerseyInvocation.Builder;
+import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.media.sse.SseFeature;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -55,8 +59,10 @@ public class ClientStarter {
 
         objectMapper.registerModule(module);
         ResponseBuilder responseBuilder = new ResponseBuilder(newClient, objectMapper);
-        return responseBuilder.buildResponse(newClient.target(url).request(
-                MediaType.APPLICATION_JSON_TYPE).get().readEntity(String.class), clazz).get();
+        JerseyWebTarget webTarget = newClient.target(url);
+        Builder requestBuilder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
+        String readEntity = requestBuilder.get().readEntity(String.class);
+        return responseBuilder.buildResponse(readEntity, clazz, URI.create(url)).get();
     }
 
 }
