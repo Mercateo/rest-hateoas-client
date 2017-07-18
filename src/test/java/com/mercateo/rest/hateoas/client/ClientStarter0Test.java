@@ -1,8 +1,10 @@
 package com.mercateo.rest.hateoas.client;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +19,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClientStarter0Test {
@@ -33,11 +38,14 @@ public class ClientStarter0Test {
     @InjectMocks
     private ClientStarter uut;
 
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @Mock
     private Builder builder;
 
     @Mock
-    private javax.ws.rs.core.Response resonse;
+    private javax.ws.rs.core.Response response;
 
     @Test
     public void testCreate() throws Exception {
@@ -46,15 +54,15 @@ public class ClientStarter0Test {
         when(jerseyClientBuilder.withConfig(any())).thenReturn(jerseyClientBuilder);
         when(client.target(anyString())).thenReturn(webTarget);
         when(webTarget.request(any(MediaType.class))).thenReturn(builder);
-        when(builder.get()).thenReturn(resonse);
-        when(resonse.readEntity(String.class)).thenReturn("");
+        when(builder.get()).thenReturn(response);
+        when(response.readEntity(String.class)).thenReturn("");
 
-        Response<Object> response = uut.create("http://mercateo.com/test", Object.class);
+        uut.create("http://mercateo.com/test", Object.class);
         verify(jerseyClientBuilder).build();
         verify(client).target(anyString());
         verify(webTarget).request(any(MediaType.class));
         verify(builder).get();
-        verify(resonse).readEntity(String.class);
+        verify(response).readEntity(String.class);
     }
 
     @Test
@@ -64,19 +72,31 @@ public class ClientStarter0Test {
         when(jerseyClientBuilder.withConfig(any())).thenReturn(jerseyClientBuilder);
         when(client.target(anyString())).thenReturn(webTarget);
         when(webTarget.request(any(MediaType.class))).thenReturn(builder);
-        when(builder.get()).thenReturn(resonse);
-        when(resonse.readEntity(String.class)).thenReturn("");
+        when(builder.get()).thenReturn(response);
+        when(response.readEntity(String.class)).thenReturn("");
 
         ClientConfiguration clientConfiguration = new ClientConfiguration("test");
 
-        Response<Object> response = uut.create("http://mercateo.com/test", Object.class,
-                clientConfiguration);
+        uut.create("http://mercateo.com/test", Object.class, clientConfiguration);
         verify(jerseyClientBuilder).build();
         verify(client).target(anyString());
         verify(webTarget).request(any(MediaType.class));
         verify(builder).get();
-        verify(resonse).readEntity(String.class);
+        verify(response).readEntity(String.class);
         verify(client).register(eq(new AuthHeaderFilter("test")));
     }
 
+    @Test
+    public void testConstructorCopiesObjectMapper() {
+        // given
+        ObjectMapper objectMapper = mock(ObjectMapper.class);
+        ObjectMapper internalMapper = new ObjectMapper();
+        when(objectMapper.copy()).thenReturn(internalMapper);
+
+        // when
+        ClientStarter uut = new ClientStarter(objectMapper);
+
+        // then
+        assertEquals(internalMapper, uut.objectMapper);
+    }
 }
