@@ -1,5 +1,7 @@
 package com.mercateo.rest.hateoas.client;
 
+import java.util.Optional;
+
 public interface SSEObserver<T> {
     public void onEvent(Response<T> response);
 
@@ -13,4 +15,9 @@ public interface SSEObserver<T> {
      * @param errorCode
      */
     public void onError(String errorCode);
+
+    public default Optional<String> lastKnownEventId() {
+        return Optional.empty();
+    }
+
 }

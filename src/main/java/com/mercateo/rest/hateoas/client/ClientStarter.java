@@ -19,6 +19,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.mercateo.rest.hateoas.client.impl.ResponseBuilder;
+import com.mercateo.rest.hateoas.client.impl.sse.LastEventIdHeaderFilter;
 
 import lombok.NonNull;
 
@@ -71,6 +72,7 @@ public class ClientStarter {
 
         JerseyClient newClient = jerseyClientBuilder.register(SseFeature.class).withConfig(
                 clientConfig).build();
+        newClient.register(LastEventIdHeaderFilter.class);
 
         if (clientConfigurationOrNull != null && !Strings.isNullOrEmpty(clientConfigurationOrNull
                 .getAuthorization())) {

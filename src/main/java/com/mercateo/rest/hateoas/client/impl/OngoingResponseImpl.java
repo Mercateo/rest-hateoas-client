@@ -24,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.media.sse.EventSource;
+import org.glassfish.jersey.media.sse.SseFeature;
 import org.glassfish.jersey.uri.UriTemplate;
 import org.reflections.ReflectionUtils;
 
@@ -44,10 +45,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.experimental.Wither;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
 public class OngoingResponseImpl<S> implements OngoingResponse<S> {
+    private static Object lock = new Object();
+
     @Value
     private static class Pair {
         WebTarget target;
@@ -81,7 +86,7 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
             return Optional.empty();
         }
 
-        return responseBuilder.buildResponse(responseString, responseClass,uri);
+        return responseBuilder.buildResponse(responseString, responseClass, uri);
 
     }
 
@@ -124,9 +129,11 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
         if (method == null) {
             method = "GET";
         }
-        
-        URI resolvedUri = resolveTemplateParams(link, method);
-        WebTarget target = responseBuilder.getClient().target(uri.resolve(resolvedUri));
+
+        URI resolvedUri = uri.resolve(resolveTemplateParams(link, method));
+        log.debug("resolving to " + resolvedUri);
+
+        WebTarget target = responseBuilder.getClient().target(resolvedUri);
 
         target = resolveQueryParams(target, link, method);
         return new Pair(target, method);
@@ -187,16 +194,34 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
         if (pair == null) {
             return Optional.empty();
         }
-        EventSource eventSource = EventSource.target(pair.target).named("SSE" + UUID.randomUUID())
-                .usePersistentConnections().reconnectingEvery(reconnectionTime,
-                        TimeUnit.MILLISECONDS).build();
-        SSEListener<S> sseListener = new SSEListener<>(responseClass, responseBuilder, observer,
-                mainEventName, uri);
-        eventSource.register(sseListener);
-        EventSourceWithCloseGuard ev = new EventSourceWithCloseGuard(eventSource, reconnectionTime,
-                sseListener);
-        ev.open();
-        return Optional.of(ev);
+        // this hack is needed because of
+        // https://github.com/jersey/jersey/pull/3600
+        // setting a global last event id header via LastEventIdHeaderFilter and
+        // synchronizing all sse
+        // sources :-(
+        synchronized (lock) {
+
+            if (observer.lastKnownEventId().isPresent()) {
+                pair.target.property(SseFeature.LAST_EVENT_ID_HEADER, observer.lastKnownEventId()
+                        .get());
+            }
+            EventSource eventSource = EventSource.target(pair.target).named("SSE" + UUID
+                    .randomUUID()).usePersistentConnections().reconnectingEvery(reconnectionTime,
+                            TimeUnit.MILLISECONDS).build();
+            SSEListener<S> sseListener = new SSEListener<>(responseClass, responseBuilder, observer,
+                    mainEventName, uri);
+            eventSource.register(sseListener);
+            EventSourceWithCloseGuard ev = new EventSourceWithCloseGuard(eventSource,
+                    reconnectionTime, sseListener);
+            ev.open();
+
+            // this hack is needed because of
+            // https://github.com/jersey/jersey/pull/3600
+            if (observer.lastKnownEventId().isPresent()) {
+                pair.target.property(SseFeature.LAST_EVENT_ID_HEADER, null);
+            }
+            return Optional.of(ev);
+        }
     }
 
     @SneakyThrows
@@ -208,14 +233,16 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
                     f -> !vars.contains(f.getName()));
             for (Field field : matchingFields) {
                 field.setAccessible(true);
-                if (Collection.class.isAssignableFrom(field.getType())) {
-                    Collection<?> value = (Collection<?>) field.get(requestObject);
-                    String[] values = value.stream().map(Object::toString).collect(Collectors
-                            .toList()).toArray(new String[0]);
-                    target = target.queryParam(field.getName(), values);
-                } else {
-                    target = target.queryParam(field.getName(), field.get(requestObject)
-                            .toString());
+                if (field.get(requestObject) != null) {
+                    if (Collection.class.isAssignableFrom(field.getType())) {
+                        Collection<?> value = (Collection<?>) field.get(requestObject);
+                        String[] values = value.stream().map(Object::toString).collect(Collectors
+                                .toList()).toArray(new String[0]);
+                        target = target.queryParam(field.getName(), values);
+                    } else {
+                        target = target.queryParam(field.getName(), field.get(requestObject)
+                                .toString());
+                    }
                 }
             }
         }
