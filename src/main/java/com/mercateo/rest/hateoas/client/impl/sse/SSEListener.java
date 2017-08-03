@@ -37,8 +37,13 @@ public class SSEListener<T> implements EventListener {
     public void onEvent(InboundEvent inboundEvent) {
         String eventName = inboundEvent.getName();
         if (mainEventName.equals(eventName)) {
-            Optional<Response<T>> resp = responseBuilder.buildResponse(inboundEvent.readData(),
-                    clazz, uri);
+            Optional<Response<T>> resp;
+            try {
+                resp = responseBuilder.buildResponse(inboundEvent.readData(), clazz, uri);
+            } catch (Exception e) {
+                sseObserver.onError(new ParsingFailedException(e, inboundEvent.getId()));
+                return;
+            }
             sseObserver.onEvent(resp.get());
         } else {
             sseObserver.onSignal(eventName);

@@ -16,6 +16,10 @@ public interface SSEObserver<T> {
      */
     public void onError(String errorCode);
 
+    public default void onError(Throwable e) {
+        onError(e.getMessage());
+    }
+
     public default Optional<String> lastKnownEventId() {
         return Optional.empty();
     }
