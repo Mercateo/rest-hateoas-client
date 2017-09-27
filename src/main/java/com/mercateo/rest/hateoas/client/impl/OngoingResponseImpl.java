@@ -201,7 +201,10 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
         // sources :-(
         synchronized (lock) {
 
-            if (observer.lastKnownEventId().isPresent()) {
+
+            // this hack is needed because of
+            // https://github.com/jersey/jersey/pull/3600
+        	if (observer.lastKnownEventId().isPresent()) {
                 pair.target.property(SseFeature.LAST_EVENT_ID_HEADER, observer.lastKnownEventId()
                         .get());
             }
@@ -215,11 +218,6 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
                     reconnectionTime, sseListener);
             ev.open();
 
-            // this hack is needed because of
-            // https://github.com/jersey/jersey/pull/3600
-            if (observer.lastKnownEventId().isPresent()) {
-                pair.target.property(SseFeature.LAST_EVENT_ID_HEADER, null);
-            }
             return Optional.of(ev);
         }
     }
