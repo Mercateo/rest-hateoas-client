@@ -13,34 +13,35 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class EventSourceWithCloseGuard implements AutoCloseable {
-    @NonNull
-    private EventSource eventSource;
+	@NonNull
+	private EventSource eventSource;
 
-    @NonNull
-    private long reconnectionTime;
+	@NonNull
+	private long reconnectionTime;
 
-    @NonNull
-    private SSEListener<?> sseListener;
+	@NonNull
+	private SSEListener<?> sseListener;
 
-    private Timer timer = new Timer(true);
+	private Timer timer = new Timer(true);
 
-    public void open() {
-        eventSource.open();
-        timer.schedule(new TimerTask() {
+	public void open() {
+		eventSource.open();
+		timer.schedule(new TimerTask() {
 
-            @Override
-            public void run() {
-                if (!eventSource.isOpen()) {
-                    sseListener.onError("");
-                    timer.cancel();
-                }
+			@Override
+			public void run() {
+				if (!eventSource.isOpen()) {
+					sseListener.onConnectionError();
+					timer.cancel();
+				}
 
-            }
-        }, reconnectionTime / 2, reconnectionTime);
-    }
+			}
+		}, reconnectionTime, reconnectionTime / 2 + 1);
+	}
 
-    public void close() {
-        eventSource.close();
-        timer.cancel();
-    }
+	@Override
+	public void close() {
+		eventSource.close();
+		timer.cancel();
+	}
 }

@@ -13,40 +13,44 @@ import lombok.Value;
 
 public class Example2 {
 
-    @Value
-    public static class IdBean {
-        String id;
-    }
+	@Value
+	public static class IdBean {
+		String id;
+	}
 
-    public static void main(String[] args) throws Exception {
-        Response<Object> rootResource = new ClientStarter().create("http://localhost:8080",
-                Object.class);
-        OngoingResponse<FactJson> sseResponse = rootResource.prepareNextWithResponse(FactJson.class)
-                .withRequestObject(new FactRequest(true, "%7B%20%22ns%22%3A%22ab%22%7D"));
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Optional<AutoCloseable> es = sseResponse.subscribe("http://rels.factcast.org/full-facts",
-                new SSEObserver<FactJson>() {
-                    private int count = 0;
+	public static void main(String[] args) throws Exception {
+		Response<Object> rootResource = new ClientStarter().create("http://localhost:8080", Object.class);
+		OngoingResponse<FactJson> sseResponse = rootResource.prepareNextWithResponse(FactJson.class)
+				.withRequestObject(new FactRequest(true, "%7B%20%22ns%22%3A%22ab%22%7D"));
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		Optional<AutoCloseable> es = sseResponse.subscribe("http://rels.factcast.org/full-facts",
+				new SSEObserver<FactJson>() {
+					private int count = 0;
 
-                    @Override
-                    public void onSignal(String signal) {
-                        System.out.println(signal + " after " + stopwatch.elapsed(TimeUnit.SECONDS)
-                                + " and " + count + " objects received");
-                    }
+					@Override
+					public void onSignal(String signal) {
+						System.out.println(signal + " after " + stopwatch.elapsed(TimeUnit.SECONDS) + " and " + count
+								+ " objects received");
+					}
 
-                    @Override
-                    public void onEvent(Response<FactJson> response) {
-                        count++;
-                        System.out.println(count + ":" + response.getResponseObject().get()
-                                .toString());
+					@Override
+					public void onEvent(Response<FactJson> response) {
+						count++;
+						System.out.println(count + ":" + response.getResponseObject().get().toString());
 
-                    }
+					}
 
-                    @Override
-                    public void onError(String errorCode) {
-                        System.out.println("error occured" + errorCode);
-                    }
-                }, "new-fact", 1000);
-        Thread.sleep(1000000);
-    }
+					@Override
+					public void onParseError(com.mercateo.rest.hateoas.client.SSEObserver.ParseError e) {
+						System.out.println("error occured" + e.getCause().getMessage());
+
+					}
+
+					@Override
+					public void onConnectionError() {
+
+					}
+				}, "new-fact", 1000);
+		Thread.sleep(1000000);
+	}
 }

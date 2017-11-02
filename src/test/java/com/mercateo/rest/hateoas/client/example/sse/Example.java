@@ -11,42 +11,47 @@ import lombok.Value;
 
 public class Example {
 
-    @Value
-    public static class IdBean {
-        String id;
-    }
+	@Value
+	public static class IdBean {
+		String id;
+	}
 
-    public static void main(String[] args) throws InterruptedException {
-        Response<Object> rootResource = new ClientStarter().create("http://localhost:8080",
-                Object.class);
-        OngoingResponse<IdBean> sseResponse = rootResource.prepareNextWithResponse(IdBean.class)
-                .withRequestObject(new FactRequest(true, "%7B%20%22ns%22%3A%22ab%22%7D"));
+	public static void main(String[] args) throws InterruptedException {
+		Response<Object> rootResource = new ClientStarter().create("http://localhost:8080", Object.class);
+		OngoingResponse<IdBean> sseResponse = rootResource.prepareNextWithResponse(IdBean.class)
+				.withRequestObject(new FactRequest(true, "%7B%20%22ns%22%3A%22ab%22%7D"));
 
-        Optional<AutoCloseable> es = sseResponse.subscribe("http://rels.factcast.org/fact-ids",
-                new SSEObserver<IdBean>() {
-                    private int count = 0;
+		Optional<AutoCloseable> es = sseResponse.subscribe("http://rels.factcast.org/fact-ids",
+				new SSEObserver<IdBean>() {
+					private int count = 0;
 
-                    @Override
-                    public void onSignal(String signal) {
-                        System.out.println(signal);
+					@Override
+					public void onSignal(String signal) {
+						System.out.println(signal);
 
-                    }
+					}
 
-                    @Override
-                    public void onEvent(Response<IdBean> response) {
-                        count++;
-                        Optional<Response<FactJson>> fact = response.prepareNextWithResponse(
-                                FactJson.class).callWithRel("canonical");
-                        System.out.println(count + fact.get().getResponseObject().get().toString());
+					@Override
+					public void onEvent(Response<IdBean> response) {
+						count++;
+						Optional<Response<FactJson>> fact = response.prepareNextWithResponse(FactJson.class)
+								.callWithRel("canonical");
+						System.out.println(count + fact.get().getResponseObject().get().toString());
 
-                    }
+					}
 
-                    @Override
-                    public void onError(String errorCode) {
-                        System.out.println("error occured" + errorCode);
+					@Override
+					public void onParseError(com.mercateo.rest.hateoas.client.SSEObserver.ParseError e) {
+						System.out.println("error occured" + e.getCause().getMessage());
 
-                    }
-                }, "new-fact", 1000);
-        Thread.sleep(10000000);
-    }
+					}
+
+					@Override
+					public void onConnectionError() {
+
+					}
+
+				}, "new-fact", 1000);
+		Thread.sleep(10000000);
+	}
 }

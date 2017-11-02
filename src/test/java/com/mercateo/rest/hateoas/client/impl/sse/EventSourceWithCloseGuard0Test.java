@@ -2,7 +2,6 @@ package com.mercateo.rest.hateoas.client.impl.sse;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,41 +17,41 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventSourceWithCloseGuard0Test {
-    @Mock
-    private EventSource eventSource;
+	@Mock
+	private EventSource eventSource;
 
-    @Mock
-    private SSEListener<?> sseListener;
+	@Mock
+	private SSEListener<?> sseListener;
 
-    @Spy
-    private Timer timer = new Timer(true);
+	@Spy
+	private Timer timer = new Timer(true);
 
-    private EventSourceWithCloseGuard uut;
+	private EventSourceWithCloseGuard uut;
 
-    @Before
-    public void setup() {
-        uut = new EventSourceWithCloseGuard(eventSource, 1, sseListener, timer);
-    }
+	@Before
+	public void setup() {
+		uut = new EventSourceWithCloseGuard(eventSource, 1, sseListener, timer);
+	}
 
-    @Test
-    public void testErrorClosing() throws InterruptedException {
-        when(eventSource.isOpen()).thenReturn(true);
-        uut.open();
-        verify(timer).schedule(any(), anyLong(), anyLong());
-        verify(eventSource).open();
+	@Test
+	public void testErrorClosing() throws InterruptedException {
+		when(eventSource.isOpen()).thenReturn(true);
+		uut.open();
+		verify(timer).schedule(any(), anyLong(), anyLong());
+		verify(eventSource).open();
 
-        when(eventSource.isOpen()).thenReturn(false);
-        Thread.sleep(20);
-        verify(timer).cancel();
-        verify(sseListener).onError(anyString());
-    }
+		when(eventSource.isOpen()).thenReturn(false);
+		Thread.sleep(20);
+		verify(timer).cancel();
+		verify(sseListener).onConnectionError();
+	}
 
-    @Test
-    public void testClose() throws InterruptedException {
-        when(eventSource.isOpen()).thenReturn(true);
-        uut.close();
-        verify(timer).cancel();
-        verify(eventSource).close();
-    }
+	@Test
+	public void testClose() throws InterruptedException {
+		when(eventSource.isOpen()).thenReturn(true);
+		uut.close();
+		verify(timer).cancel();
+		verify(eventSource).close();
+	}
 
 }
