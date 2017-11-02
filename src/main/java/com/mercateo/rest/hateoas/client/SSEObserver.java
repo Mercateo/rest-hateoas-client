@@ -26,8 +26,7 @@ public interface SSEObserver<T> {
 	 * this is called when some errors connection error occurred. Due to
 	 * https://github.com/jersey/jersey/issues/3537 it is not possible to
 	 * distinguish between errors at this moment
-	 * 
-	 * @param errorCode
+	 *
 	 */
 	public void onConnectionError();
 
