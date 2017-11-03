@@ -31,8 +31,12 @@ public class EventSourceWithCloseGuard implements AutoCloseable {
 			@Override
 			public void run() {
 				if (!eventSource.isOpen()) {
-					sseListener.onConnectionError();
-					timer.cancel();
+					try {
+						close();
+					} finally {
+						sseListener.onConnectionError();
+					}
+
 				}
 
 			}
