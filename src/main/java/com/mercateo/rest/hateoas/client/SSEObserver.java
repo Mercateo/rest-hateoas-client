@@ -23,7 +23,7 @@ public interface SSEObserver<T> {
 	public void onParseError(ParseError e);
 
 	/**
-	 * this is called when some errors connection error occurred. Due to
+	 * this is called when some connection error occurred. Due to
 	 * https://github.com/jersey/jersey/issues/3537 it is not possible to
 	 * distinguish between errors at this moment
 	 *
