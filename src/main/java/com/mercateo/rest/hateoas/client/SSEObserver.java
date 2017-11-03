@@ -20,12 +20,19 @@ public interface SSEObserver<T> {
 
 	public void onSignal(String signal);
 
+	/**
+	 * this is called when some error occurred while parsing the main eventtype
+	 * 
+	 * @param e
+	 *            the error
+	 */
 	public void onParseError(ParseError e);
 
 	/**
 	 * this is called when some connection error occurred. Due to
 	 * https://github.com/jersey/jersey/issues/3537 it is not possible to
-	 * distinguish between errors at this moment
+	 * distinguish between errors at this moment. The EventSource is closed! so
+	 * no events will be published anymore
 	 *
 	 */
 	public void onConnectionError();
