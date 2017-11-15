@@ -76,8 +76,7 @@ public class ClientStarter {
 			newClient.register(new AuthHeaderFilter(clientConfigurationOrNull.getAuthorization()));
 		}
 
-		MediaType mediaType = clientConfiguration.map(c -> c.getMediaType().orElse(MediaType.APPLICATION_JSON_TYPE))
-				.orElse(MediaType.APPLICATION_JSON_TYPE);
+		MediaType mediaType = clientConfiguration.map(c -> c.getMediaType()).orElse(MediaType.APPLICATION_JSON_TYPE);
 
 		ResponseBuilder responseBuilder = new ResponseBuilder(newClient, objectMapper, mediaType);
 		JerseyWebTarget webTarget = newClient.target(url);
