@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.core.MediaType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,14 +25,19 @@ import lombok.NonNull;
 @AllArgsConstructor
 public class ResponseBuilder {
 
-    @NonNull
+	@NonNull
 	@Getter
 	private Client client;
-	
+
 	@NonNull
 	private ObjectMapper objectMapper;
 
-	public <S> Optional<Response<S>> buildResponse(@NonNull String responseString, @NonNull Class<S> responseClass, @NonNull URI uri) {
+	@NonNull
+	@Getter
+	private MediaType mediaType;
+
+	public <S> Optional<Response<S>> buildResponse(@NonNull String responseString, @NonNull Class<S> responseClass,
+			@NonNull URI uri) {
 		if (responseString.length() == 0) {
 			return Optional.of(new ResponseImpl<>(this, null, null, uri));
 		}

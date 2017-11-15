@@ -36,6 +36,8 @@ public class SchemaLink {
 
 	private JsonNode targetSchema;
 
+	private String mediaType;
+
 	// backwards compatibility, would be canged in next version
 	public void setHref(String href) {
 		if (href.contains("%7B")) {
