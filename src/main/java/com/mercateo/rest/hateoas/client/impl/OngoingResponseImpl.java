@@ -134,7 +134,7 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 			method = "GET";
 		}
 
-		URI resolvedUri = uri.resolve(resolveTemplateParams(link, method));
+		URI resolvedUri = uri.resolve(resolveTemplateParams(link));
 		log.debug("resolving to " + resolvedUri);
 
 		WebTarget target = responseBuilder.getClient().target(resolvedUri);
@@ -156,30 +156,27 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 		return method.equalsIgnoreCase("put") || method.equalsIgnoreCase("post");
 	}
 
-	private URI resolveTemplateParams(SchemaLink link, String method) {
+	private URI resolveTemplateParams(SchemaLink link) {
 		Map<String, String> pathParams = new HashMap<>();
 		UriTemplate uriTemplate = link.getHref();
-		if (method.equalsIgnoreCase("get") && requestObject != null) {
-			List<String> vars = uriTemplate.getTemplateVariables();
-			if (vars.size() > 0) {
-
-				for (String var : vars) {
-					@SuppressWarnings("unchecked")
-					Set<Field> matchingFields = ReflectionUtils.getAllFields(requestObject.getClass(),
-							f -> f.getName().equals(var));
-					if (matchingFields.isEmpty()) {
-						throw new IllegalStateException("No field found for the template variable " + var);
-					} else if (matchingFields.size() != 1) {
-						throw new IllegalStateException("There is more than one field for the template variable " + var
-								+ ": " + matchingFields);
-					}
-					Field matchingField = matchingFields.iterator().next();
-					matchingField.setAccessible(true);
-					try {
-						pathParams.put(var, matchingField.get(requestObject).toString());
-					} catch (IllegalAccessException e) {
-						throw new ProcessingException(" Should never happen :-)");
-					}
+		List<String> vars = uriTemplate.getTemplateVariables();
+		if (vars.size() > 0) {
+			for (String var : vars) {
+				@SuppressWarnings("unchecked")
+				Set<Field> matchingFields = ReflectionUtils.getAllFields(requestObject.getClass(),
+						f -> f.getName().equals(var));
+				if (matchingFields.isEmpty()) {
+					throw new IllegalStateException("No field found for the template variable " + var);
+				} else if (matchingFields.size() != 1) {
+					throw new IllegalStateException("There is more than one field for the template variable " + var
+							+ ": " + matchingFields);
+				}
+				Field matchingField = matchingFields.iterator().next();
+				matchingField.setAccessible(true);
+				try {
+					pathParams.put(var, matchingField.get(requestObject).toString());
+				} catch (IllegalAccessException e) {
+					throw new ProcessingException(" Should never happen :-)");
 				}
 			}
 		}
