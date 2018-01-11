@@ -160,26 +160,24 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 		Map<String, String> pathParams = new HashMap<>();
 		UriTemplate uriTemplate = link.getHref();
 		List<String> vars = uriTemplate.getTemplateVariables();
-		if (vars.size() > 0) {
-			for (String var : vars) {
-				@SuppressWarnings("unchecked")
-				Set<Field> matchingFields = ReflectionUtils.getAllFields(requestObject.getClass(),
-						f -> f.getName().equals(var));
-				if (matchingFields.isEmpty()) {
-					throw new IllegalStateException("No field found for the template variable " + var);
-				} else if (matchingFields.size() != 1) {
-					throw new IllegalStateException("There is more than one field for the template variable " + var
-							+ ": " + matchingFields);
-				}
-				Field matchingField = matchingFields.iterator().next();
-				matchingField.setAccessible(true);
-				try {
-					pathParams.put(var, matchingField.get(requestObject).toString());
-				} catch (IllegalAccessException e) {
-					throw new ProcessingException(" Should never happen :-)");
-				}
+		vars.forEach(var -> {
+			@SuppressWarnings("unchecked")
+			Set<Field> matchingFields = ReflectionUtils.getAllFields(requestObject.getClass(),
+					f -> f.getName().equals(var));
+			if (matchingFields.isEmpty()) {
+				throw new IllegalStateException("No field found for the template variable " + var);
+			} else if (matchingFields.size() != 1) {
+				throw new IllegalStateException("There is more than one field for the template variable " + var
+						+ ": " + matchingFields);
 			}
-		}
+			Field matchingField = matchingFields.iterator().next();
+			matchingField.setAccessible(true);
+			try {
+				pathParams.put(var, matchingField.get(requestObject).toString());
+			} catch (IllegalAccessException e) {
+				throw new ProcessingException(" Should never happen :-)");
+			}
+		});
 		try {
 			return new URI(uriTemplate.createURI(pathParams));
 		} catch (URISyntaxException e) {
