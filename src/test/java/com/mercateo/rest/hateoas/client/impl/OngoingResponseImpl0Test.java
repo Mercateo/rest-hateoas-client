@@ -2,6 +2,7 @@ package com.mercateo.rest.hateoas.client.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.eq;
@@ -30,12 +31,16 @@ import org.glassfish.jersey.uri.UriTemplate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Maps;
 import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
 import com.mercateo.rest.hateoas.client.schema.SchemaLink;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
 import jersey.repackaged.com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
@@ -43,15 +48,31 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+@RunWith(DataProviderRunner.class)
 public class OngoingResponseImpl0Test {
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
-	public class StringIdBean {
+	public static class StringIdBean {
 		String id;
 	}
 
-	@Data
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class StringFooBean {
+        String foo;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class StringIdFooBean {
+        String id;
+        String foo;
+    }
+
+    @Data
 	@AllArgsConstructor
 	@NoArgsConstructor
 	public class StringIdCollectionBean {
@@ -313,4 +334,82 @@ public class OngoingResponseImpl0Test {
 		when(response.readEntity(String.class)).thenThrow(ProcessingException.class);
 		uut.callListWithRel("test");
 	}
+
+    @DataProvider
+    public static Object[][] validData() {
+        return new Object[][] {
+        // @formatter:off
+        { "get"  , "http://www.mercateo.com/{id}"               , new StringIdBean("id")        , "http://www.mercateo.com/id"          },
+        { "put"  , "http://www.mercateo.com/{id}"               , new StringIdBean("id")        , "http://www.mercateo.com/id"          },
+        { "post" , "http://www.mercateo.com/{id}"               , new StringIdBean("id")        , "http://www.mercateo.com/id"          },
+        { "get"  , "http://www.mercateo.com/"                   , new StringIdBean("id")        , "http://www.mercateo.com/"            },
+        { "get"  , "http://www.mercateo.com/{id}/orders/{foo}"  , new StringIdFooBean("1", "2") , "http://www.mercateo.com/1/orders/2"  },
+        { "get"  , "http://www.mercateo.com/{foo}"              , new StringIdFooBean("1", "2") , "http://www.mercateo.com/2"           },
+        { "get"  , "http://www.mercateo.com/{foo}/orders/{id}"  , new StringIdFooBean("1", "2") , "http://www.mercateo.com/2/orders/1"  },
+        { "get"  , "http://www.mercateo.com/{foo}/orders/{foo}" , new StringIdFooBean("1", "2") , "http://www.mercateo.com/2/orders/2"  },
+        // @formatter:on
+        };
+    }
+
+    @DataProvider
+    public static Object[][] erroneousData() {
+        return new Object[][] {
+        // @formatter:off
+        { "get" , "http://www.mercateo.com/{id}" ,         null             , IllegalStateException.class },
+        { "get" , "http://www.mercateo.com/{id}" , new StringFooBean("bar") , IllegalStateException.class },
+        // @formatter:on
+        };
+    }
+
+    @Test
+    @UseDataProvider("validData")
+    public void testCallListWithRel_and_withRequestObject_with_validData(String method, String url,
+            Object requestObject, String expected) throws Exception {
+
+        // given
+        SchemaLink mockLink = mock(SchemaLink.class);
+        when(mockLink.getMap()).thenReturn(Maps.asMap(Sets.newHashSet(
+                OngoingResponseImpl.METHOD_PARAM_KEY), k -> method));
+        UriTemplate uri = new UriTemplate(url);
+        when(mockLink.getHref()).thenReturn(uri);
+        when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
+        when(response.readEntity(String.class)).thenReturn("");
+
+        // when
+        uut = uut.withRequestObject(requestObject);
+        uut.callWithRel("test");
+
+        // then
+        verify(responseBuilder).buildResponse(any(), any(), any());
+        verify(client).target(eq(new URI(expected)));
+
+    }
+
+    @Test
+    @UseDataProvider("erroneousData")
+    public void testCallListWithRel_and_withRequestObject_with_erroneousData(String method,
+            String url, Object requestObject, Class<? extends Exception> expected)
+            throws Exception {
+
+        // given
+        SchemaLink mockLink = mock(SchemaLink.class);
+        when(mockLink.getMap()).thenReturn(Maps.asMap(Sets.newHashSet(
+                OngoingResponseImpl.METHOD_PARAM_KEY), k -> method));
+        UriTemplate uri = new UriTemplate(url);
+        when(mockLink.getHref()).thenReturn(uri);
+        when(jsonHyperSchema.getByRel(any())).thenReturn(Optional.of(mockLink));
+        when(response.readEntity(String.class)).thenReturn("");
+
+        try {
+            // when
+            uut = uut.withRequestObject(requestObject);
+            uut.callWithRel("test");
+            fail("expected exception " + expected);
+        } catch (Exception e) {
+            // then
+            assertEquals(expected, e.getClass());
+        }
+
+    }
+
 }

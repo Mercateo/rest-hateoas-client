@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -161,9 +162,7 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 		UriTemplate uriTemplate = link.getHref();
 		List<String> vars = uriTemplate.getTemplateVariables();
 		vars.forEach(var -> {
-			@SuppressWarnings("unchecked")
-			Set<Field> matchingFields = ReflectionUtils.getAllFields(requestObject.getClass(),
-					f -> f.getName().equals(var));
+			Set<Field> matchingFields = extractFieldsFromRequestObjectFor(var);
 			if (matchingFields.isEmpty()) {
 				throw new IllegalStateException("No field found for the template variable " + var);
 			} else if (matchingFields.size() != 1) {
@@ -186,7 +185,15 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 
 	}
 
-	@Override
+    @SuppressWarnings("unchecked")
+    private Set<Field> extractFieldsFromRequestObjectFor(String var) {
+        if (requestObject == null) {
+            return Collections.emptySet();
+        }
+        return ReflectionUtils.getAllFields(requestObject.getClass(), f -> f.getName().equals(var));
+    }
+
+    @Override
 	public Optional<AutoCloseable> subscribe(@NonNull String rel, @NonNull SSEObserver<S> observer,
 			@NonNull String mainEventName, long reconnectionTime) {
 		checkArgument(reconnectionTime > 0);
