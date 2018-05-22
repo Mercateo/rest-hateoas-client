@@ -64,6 +64,9 @@ public class ResponseBuilder {
 
 	private ClientHyperSchema buildSchema(JsonNode rawValue) {
 		JsonNode schemaElement = rawValue.get("_schema");
+		if (schemaElement == null) {
+		    throw new IllegalStateException("there is no '_schema'");
+		}
 		try {
 			return objectMapper.treeToValue(schemaElement, ClientHyperSchema.class);
 		} catch (JsonProcessingException e) {
