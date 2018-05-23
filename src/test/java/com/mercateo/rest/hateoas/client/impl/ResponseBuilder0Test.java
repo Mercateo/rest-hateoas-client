@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -65,6 +66,20 @@ public class ResponseBuilder0Test {
 		assertTrue(r.jsonHyperSchema.getByRel("orders").isPresent());
 		assertTrue(r.jsonHyperSchema.getByRel("orders-linking").isPresent());
 	}
+
+    @Test
+    public void testBuildResponse_without_schema() throws Exception {
+        String responseRaw = CharStreams.toString(new InputStreamReader(this.getClass()
+                .getResourceAsStream("response_wihtout_schema.json"), Charsets.UTF_8));
+
+        try {
+            uut.buildResponse(responseRaw, Object.class, uri);
+            fail("exception must be thrown");
+        } catch (IllegalStateException e) {
+            assertEquals("there is no '_schema'", e.getMessage());
+        }
+
+    }
 
 	@Test(expected = ProcessingException.class)
 	public void testBuildResponseSchemaNotMatch() throws Exception {
