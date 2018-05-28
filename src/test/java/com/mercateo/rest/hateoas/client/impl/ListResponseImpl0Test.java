@@ -14,10 +14,10 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.collect.Lists;
 import com.mercateo.rest.hateoas.client.Response;
 import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
 
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ListResponseImpl0Test {

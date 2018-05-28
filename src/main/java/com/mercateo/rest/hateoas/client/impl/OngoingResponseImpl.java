@@ -22,6 +22,8 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.StatusType;
 
 import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.media.sse.EventSource;
@@ -117,13 +119,24 @@ public class OngoingResponseImpl<S> implements OngoingResponse<S> {
 			response = b.method(callContext.method);
 		}
 		if (response.getStatus() >= 300) {
-			throw new WebApplicationException(response);
+			throw new WebApplicationException(errorMessage(response));
 		}
 		String responseString = response.readEntity(String.class);
 		return responseString;
 	}
 
-	private CallContext resolve(String rel) {
+    private String errorMessage(javax.ws.rs.core.Response response) {
+        if (response != null) {
+            StatusType statusInfo = response.getStatusInfo();
+            return "HTTP " + statusInfo.getStatusCode() + ' ' + statusInfo.getReasonPhrase()
+                + ", response: " + response.readEntity(String.class);
+        } else {
+            StatusType statusInfo = Status.INTERNAL_SERVER_ERROR;
+            return "HTTP " + statusInfo.getStatusCode() + ' ' + statusInfo.getReasonPhrase();
+        }
+    }
+
+    private CallContext resolve(String rel) {
 		Optional<SchemaLink> linkOption = jsonHyperSchema.getByRel(rel);
 		if (!linkOption.isPresent()) {
 			return null;

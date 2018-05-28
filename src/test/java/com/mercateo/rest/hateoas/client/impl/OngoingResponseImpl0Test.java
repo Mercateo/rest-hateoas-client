@@ -36,13 +36,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mercateo.rest.hateoas.client.schema.ClientHyperSchema;
 import com.mercateo.rest.hateoas.client.schema.SchemaLink;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
 
-import jersey.repackaged.com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
