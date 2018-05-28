@@ -4,7 +4,7 @@
 
 	<groupId>com.mercateo.rest</groupId>
 	<artifactId>rest-hateoas-client</artifactId>
-	<version>0.5.0</version>
+	<version>0.5.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>rest-hateoas-client</name>
 	<description>Client for dynamic discovery of REST-APIs which are developed with the help of common.rest.schemagen</description>
@@ -34,7 +34,7 @@
 		<connection>scm:git:git@github.com:Mercateo/rest-hateoas-client.git</connection>
 		<developerConnection>scm:git:git@github.com:Mercateo/rest-hateoas-client.git</developerConnection>
 		<url>https://github.com/Mercateo/rest-hateoas-client.git</url>
-		<tag>0.5.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 	<developers>
 		<developer>
