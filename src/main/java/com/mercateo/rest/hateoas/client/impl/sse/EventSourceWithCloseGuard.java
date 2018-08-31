@@ -28,6 +28,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class EventSourceWithCloseGuard implements AutoCloseable {
+
+	private final Object closeLock = new Object();
+
+	private boolean isShuttingDown = false;
+
 	@NonNull
 	private EventSource eventSource;
 
@@ -45,13 +50,15 @@ public class EventSourceWithCloseGuard implements AutoCloseable {
 
 			@Override
 			public void run() {
-				if (!eventSource.isOpen()) {
-					try {
-						close();
-					} finally {
-						sseListener.onConnectionError();
-					}
+				synchronized (closeLock) {
+					if (!eventSource.isOpen() && !isShuttingDown) {
+						try {
+							close();
+						} finally {
+							sseListener.onConnectionError();
+						}
 
+					}
 				}
 
 			}
@@ -60,7 +67,10 @@ public class EventSourceWithCloseGuard implements AutoCloseable {
 
 	@Override
 	public void close() {
-		eventSource.close();
-		timer.cancel();
+		synchronized (closeLock) {
+			isShuttingDown = true;
+			timer.cancel();
+			eventSource.close();
+		}
 	}
 }
