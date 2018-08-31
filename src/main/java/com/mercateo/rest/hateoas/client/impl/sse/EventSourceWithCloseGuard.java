@@ -69,8 +69,11 @@ public class EventSourceWithCloseGuard implements AutoCloseable {
 	public void close() {
 		synchronized (closeLock) {
 			isShuttingDown = true;
-			timer.cancel();
-			eventSource.close();
+			try {
+				timer.cancel();
+			} finally {
+				eventSource.close();
+			}
 		}
 	}
 }
