@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>com.mercateo.rest</groupId>
 	<artifactId>rest-hateoas-client</artifactId>
-	<version>0.5.2-SNAPSHOT</version>
+	<version>0.5.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>rest-hateoas-client</name>
 	<description>Client for dynamic discovery of REST-APIs which are developed with the help of common.rest.schemagen</description>
@@ -110,7 +110,7 @@
 		<dependency>
 			<artifactId>reflections</artifactId>
 			<groupId>org.reflections</groupId>
-			<version>0.9.10</version>
+			<version>0.10.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.connectors</groupId>

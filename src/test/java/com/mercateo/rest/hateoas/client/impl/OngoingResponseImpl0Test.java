@@ -182,7 +182,7 @@ public class OngoingResponseImpl0Test {
 			Assert.fail("No IllegalStateException thrown");
 		} catch (IllegalStateException e) {
 			assertEquals(
-					"There is more than one field for the template variable id: [java.lang.String com.mercateo.rest.hateoas.client.impl.OngoingResponseImpl0Test$StringIdBean.id, java.lang.String com.mercateo.rest.hateoas.client.impl.OngoingResponseImpl0Test$StringIdBean2.id]",
+					"There is more than one field for the template variable id: [java.lang.String com.mercateo.rest.hateoas.client.impl.OngoingResponseImpl0Test$StringIdBean2.id, java.lang.String com.mercateo.rest.hateoas.client.impl.OngoingResponseImpl0Test$StringIdBean.id]",
 					e.getMessage());
 		}
 	}
